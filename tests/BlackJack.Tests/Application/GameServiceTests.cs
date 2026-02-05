@@ -10,7 +10,7 @@ public class GameServiceTests
   public void StartNewRound_DealsTwoCardsEach()
   {
     var service = new GameService();
-    var settings = new GameSettings(1, true);
+    var settings = new GameSettings(1, true, 4, true, true, true, false);
     var state = service.StartNewRound(settings, new FixedRandomProvider(), "Tester");
 
     Assert.Equal(2, state.Player.ActiveHand.Cards.Count);
@@ -56,6 +56,30 @@ public class GameServiceTests
     Assert.Equal(0, updated.Player.ActiveHandIndex);
   }
 
+  [Fact]
+  public void PlayerSplit_AllowsTenValuePair()
+  {
+    var service = new GameService();
+    var state = BuildTenValueSplitState();
+
+    var updated = service.PlayerSplit(state);
+
+    Assert.Equal(2, updated.Player.Hands.Count);
+  }
+
+  [Fact]
+  public void PlayerSplit_Aces_LocksHandsAndKeepsTurn()
+  {
+    var service = new GameService();
+    var state = BuildAceSplitState();
+
+    var updated = service.PlayerSplit(state);
+
+    Assert.True(updated.IsPlayerTurn);
+    Assert.True(updated.IsHandLocked(0));
+    Assert.True(updated.IsHandLocked(1));
+  }
+
   private static RoundState BuildState()
   {
     var shoe = new Shoe(1);
@@ -67,7 +91,16 @@ public class GameServiceTests
     dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
     dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
 
-    return new RoundState(shoe, player, dealer, standOnSoft17: true);
+    return new RoundState(
+      shoe,
+      player,
+      dealer,
+      standOnSoft17: true,
+      maxHands: 4,
+      allowTenValueSplit: true,
+      allowResplitAces: true,
+      restrictSplitAcesToOneCard: true,
+      allowDoubleDownAfterSplitAces: false);
   }
 
   private static RoundState BuildSplitState()
@@ -81,7 +114,62 @@ public class GameServiceTests
     dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
     dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
 
-    return new RoundState(shoe, player, dealer, standOnSoft17: true);
+    return new RoundState(
+      shoe,
+      player,
+      dealer,
+      standOnSoft17: true,
+      maxHands: 4,
+      allowTenValueSplit: true,
+      allowResplitAces: true,
+      restrictSplitAcesToOneCard: true,
+      allowDoubleDownAfterSplitAces: false);
+  }
+
+  private static RoundState BuildTenValueSplitState()
+  {
+    var shoe = new Shoe(1);
+    var player = new HumanPlayer("Tester");
+    var dealer = new Dealer("Dealer");
+
+    player.ActiveHand.Add(new Card(Suit.Spades, Rank.King));
+    player.ActiveHand.Add(new Card(Suit.Hearts, Rank.Queen));
+    dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
+    dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
+
+    return new RoundState(
+      shoe,
+      player,
+      dealer,
+      standOnSoft17: true,
+      maxHands: 4,
+      allowTenValueSplit: true,
+      allowResplitAces: true,
+      restrictSplitAcesToOneCard: true,
+      allowDoubleDownAfterSplitAces: false);
+  }
+
+  private static RoundState BuildAceSplitState()
+  {
+    var shoe = new Shoe(1);
+    var player = new HumanPlayer("Tester");
+    var dealer = new Dealer("Dealer");
+
+    player.ActiveHand.Add(new Card(Suit.Spades, Rank.Ace));
+    player.ActiveHand.Add(new Card(Suit.Hearts, Rank.Ace));
+    dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
+    dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
+
+    return new RoundState(
+      shoe,
+      player,
+      dealer,
+      standOnSoft17: true,
+      maxHands: 4,
+      allowTenValueSplit: true,
+      allowResplitAces: true,
+      restrictSplitAcesToOneCard: true,
+      allowDoubleDownAfterSplitAces: false);
   }
 
   private sealed class FixedRandomProvider : IRandomProvider

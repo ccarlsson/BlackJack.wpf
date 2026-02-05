@@ -82,7 +82,14 @@ public partial class MainViewModel : ObservableObject
   [RelayCommand]
   private void NewRound()
   {
-    var settings = new GameSettings(DeckCount, StandOnSoft17);
+    var settings = new GameSettings(
+      DeckCount,
+      StandOnSoft17,
+      _settings.MaxHands,
+      _settings.AllowTenValueSplit,
+      _settings.AllowResplitAces,
+      _settings.RestrictSplitAcesToOneCard,
+      _settings.AllowDoubleDownAfterSplitAces);
     _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName);
     UpdateFromState();
     StatusText = "New round started.";
@@ -287,7 +294,32 @@ public partial class MainViewModel : ObservableObject
 
     var cards = state.Player.ActiveHand.Cards;
 
-    return state.Player.Hands.Count == 1 && cards.Count == 2 && cards[0].Rank == cards[1].Rank;
+    if (state.Player.Hands.Count >= state.MaxHands)
+    {
+      return false;
+    }
+
+    if (cards.Count != 2)
+    {
+      return false;
+    }
+
+    var sameRank = cards[0].Rank == cards[1].Rank;
+    var tenValuePair = state.AllowTenValueSplit && cards[0].BaseValue == 10 && cards[1].BaseValue == 10;
+    var isAcePair = cards[0].Rank == Rank.Ace && cards[1].Rank == Rank.Ace;
+    var canByValue = sameRank || tenValuePair;
+
+    if (!canByValue)
+    {
+      return false;
+    }
+
+    if (state.IsHandLocked(state.Player.ActiveHandIndex))
+    {
+      return state.AllowResplitAces && isAcePair;
+    }
+
+    return true;
   }
 
   private static bool ResolveDoubleDownAvailability(RoundState state)
@@ -295,6 +327,11 @@ public partial class MainViewModel : ObservableObject
     if (state.IsRoundOver || !state.IsPlayerTurn)
     {
       return false;
+    }
+
+    if (state.IsHandLocked(state.Player.ActiveHandIndex))
+    {
+      return state.AllowDoubleDownAfterSplitAces && state.Player.ActiveHand.Cards.Count == 2;
     }
 
     return state.Player.ActiveHand.Cards.Count == 2;

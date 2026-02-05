@@ -29,7 +29,16 @@ public sealed class GameService : IGameService
 
     DealInitialCards(shoe, player, dealer);
 
-    var state = new RoundState(shoe, player, dealer, settings.StandOnSoft17);
+    var state = new RoundState(
+      shoe,
+      player,
+      dealer,
+      settings.StandOnSoft17,
+      settings.MaxHands,
+      settings.AllowTenValueSplit,
+      settings.AllowResplitAces,
+      settings.RestrictSplitAcesToOneCard,
+      settings.AllowDoubleDownAfterSplitAces);
 
     if (player.ActiveHand.IsBlackjack || dealer.ActiveHand.IsBlackjack)
     {
@@ -48,6 +57,11 @@ public sealed class GameService : IGameService
     }
 
     EnsurePlayerTurn(state);
+
+    if (state.IsHandLocked(state.Player.ActiveHandIndex))
+    {
+      throw new InvalidOperationException("Active hand is locked.");
+    }
 
     state.Player.ActiveHand.Add(state.Shoe.Draw());
 
@@ -86,6 +100,7 @@ public sealed class GameService : IGameService
     }
 
     var activeHand = state.Player.ActiveHand;
+    var isAceSplit = activeHand.Cards[0].Rank == Rank.Ace && activeHand.Cards[1].Rank == Rank.Ace;
     var secondCard = activeHand.RemoveAt(1);
     var splitHand = new Hand();
     splitHand.Add(secondCard);
@@ -93,6 +108,19 @@ public sealed class GameService : IGameService
 
     activeHand.Add(state.Shoe.Draw());
     splitHand.Add(state.Shoe.Draw());
+
+    if (isAceSplit && state.RestrictSplitAcesToOneCard)
+    {
+      var activeIndex = state.Player.ActiveHandIndex;
+      var splitIndex = state.Player.Hands.Count - 1;
+      state.LockHand(activeIndex);
+      state.LockHand(splitIndex);
+
+      if (!state.AllowResplitAces)
+      {
+        state.IsPlayerTurn = false;
+      }
+    }
 
     return state;
   }
@@ -155,14 +183,34 @@ public sealed class GameService : IGameService
 
   private static bool CanSplit(RoundState state)
   {
-    if (state.Player.Hands.Count > 1)
+    if (state.Player.Hands.Count >= state.MaxHands)
     {
       return false;
     }
 
     var cards = state.Player.ActiveHand.Cards;
 
-    return cards.Count == 2 && cards[0].Rank == cards[1].Rank;
+    if (cards.Count != 2)
+    {
+      return false;
+    }
+
+    var sameRank = cards[0].Rank == cards[1].Rank;
+    var tenValuePair = state.AllowTenValueSplit && cards[0].BaseValue == 10 && cards[1].BaseValue == 10;
+    var isAcePair = cards[0].Rank == Rank.Ace && cards[1].Rank == Rank.Ace;
+    var canByValue = sameRank || tenValuePair;
+
+    if (!canByValue)
+    {
+      return false;
+    }
+
+    if (state.IsHandLocked(state.Player.ActiveHandIndex))
+    {
+      return state.AllowResplitAces && isAcePair;
+    }
+
+    return true;
   }
 
   private static void DealerPlay(RoundState state)
