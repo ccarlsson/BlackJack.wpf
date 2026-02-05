@@ -94,6 +94,10 @@ public partial class MainViewModel : ObservableObject
       _settings.AllowDoubleDownAfterSplitAces);
     _lastResult = null;
     _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName);
+    if (_roundState.IsRoundOver)
+    {
+      _lastResult = _gameService.FinishRound(_roundState);
+    }
     UpdateFromState();
     StatusText = "New round started.";
   }
@@ -133,7 +137,7 @@ public partial class MainViewModel : ObservableObject
     var result = _gameService.FinishRound(_roundState);
     _lastResult = result;
     UpdateFromState();
-    StatusText = "Round complete.";
+    StatusText = BuildRoundSummary(result);
   }
 
   [RelayCommand(CanExecute = nameof(CanDoubleDown))]
@@ -228,6 +232,11 @@ public partial class MainViewModel : ObservableObject
       DealerCards.Add(cardLabel);
     }
 
+    if (_roundState.IsRoundOver && _lastResult is not null)
+    {
+      StatusText = BuildRoundSummary(_lastResult);
+    }
+
     UpdateCommandStates();
   }
 
@@ -311,6 +320,12 @@ public partial class MainViewModel : ObservableObject
       _ => "Payout: 0x"
     };
 
+    if (handResult.PlayerBlackjack)
+    {
+      var blackjackTone = handResult.Outcome == OutcomeType.DealerWin ? "Lose" : "Blackjack";
+      return ("Result: Blackjack", blackjackTone, payoutText);
+    }
+
     var outcome = handResult.Outcome switch
     {
       OutcomeType.PlayerWin => ("Result: Win", "Win", payoutText),
@@ -319,6 +334,26 @@ public partial class MainViewModel : ObservableObject
     };
 
     return outcome;
+  }
+
+  private static string BuildRoundSummary(RoundResult result)
+  {
+    if (result.HandResults.Count == 0)
+    {
+      return "Round complete.";
+    }
+
+    if (result.HandResults.Any(hand => hand.PlayerBlackjack && hand.Outcome == OutcomeType.PlayerWin))
+    {
+      return "Blackjack!";
+    }
+
+    if (result.HandResults.Any(hand => hand.PlayerBlackjack && hand.Outcome == OutcomeType.Push))
+    {
+      return "Blackjack push.";
+    }
+
+    return "Round complete.";
   }
 
   private static bool ResolveSplitAvailability(RoundState state)

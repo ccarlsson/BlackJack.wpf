@@ -194,6 +194,30 @@
           Property="Foreground"
           Value="{StaticResource OutcomePush}"/>
         </DataTrigger>
+      <DataTrigger Binding="{Binding OutcomeTone}"
+          Value="Blackjack">
+        <Setter TargetName="OutcomeChip"
+            Property="BorderBrush"
+            Value="{StaticResource OutcomeBlackjack}"/>
+        <Setter TargetName="OutcomeChip"
+            Property="Background"
+            Value="#2C2614"/>
+        <Setter TargetName="OutcomeChip"
+            Property="Effect">
+          <Setter.Value>
+            <DropShadowEffect Color="{StaticResource OutcomeBlackjackColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.7"/>
+          </Setter.Value>
+        </Setter>
+        <Setter TargetName="OutcomeIcon"
+            Property="Text"
+            Value="BJ"/>
+        <Setter TargetName="OutcomeIcon"
+            Property="Foreground"
+            Value="{StaticResource OutcomeBlackjack}"/>
+        <Setter TargetName="HandOutcome"
+            Property="Foreground"
+            Value="{StaticResource OutcomeBlackjack}"/>
+      </DataTrigger>
       <DataTrigger Binding="{Binding IsActive}"
           Value="True">
         <Setter TargetName="HandFrame"

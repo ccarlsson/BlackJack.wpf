@@ -11,4 +11,6 @@
     <Color x:Key="OutcomeWinColor">#2F9E44</Color>
     <Color x:Key="OutcomeLoseColor">#E85D75</Color>
     <Color x:Key="OutcomePushColor">#E0B84A</Color>
+    <SolidColorBrush x:Key="OutcomeBlackjack" Color="#F2C94C"/>
+    <Color x:Key="OutcomeBlackjackColor">#F2C94C</Color>
 </ResourceDictionary>
