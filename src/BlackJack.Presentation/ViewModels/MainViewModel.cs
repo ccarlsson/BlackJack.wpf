@@ -53,10 +53,19 @@ public partial class MainViewModel : ObservableObject
   private int _dealerValue;
 
   [ObservableProperty]
+  private string _dealerValueText = "";
+
+  [ObservableProperty]
   private bool _isRoundActive;
 
   [ObservableProperty]
   private bool _isPlayerTurn;
+
+  [ObservableProperty]
+  private bool _isSplitAvailable;
+
+  [ObservableProperty]
+  private bool _isDoubleDownAvailable;
 
   [RelayCommand]
   private void NewRound()
@@ -103,11 +112,35 @@ public partial class MainViewModel : ObservableObject
     StatusText = BuildOutcomeSummary(result);
   }
 
+  [RelayCommand(CanExecute = nameof(CanDoubleDown))]
+  private void DoubleDown()
+  {
+    if (_roundState is null)
+    {
+      return;
+    }
+
+    _roundState = _gameService.PlayerHit(_roundState);
+    _roundState = _gameService.PlayerStand(_roundState);
+    UpdateFromState();
+    StatusText = "Double down resolved.";
+  }
+
+  [RelayCommand(CanExecute = nameof(CanSplit))]
+  private void Split()
+  {
+    StatusText = "Split is not implemented yet.";
+  }
+
   private bool CanHit() => _roundState is not null && IsRoundActive && IsPlayerTurn;
 
   private bool CanStand() => _roundState is not null && IsRoundActive && IsPlayerTurn;
 
   private bool CanFinishRound() => _roundState is not null && IsRoundActive && !IsPlayerTurn;
+
+  private bool CanDoubleDown() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable;
+
+  private bool CanSplit() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable;
 
   private void UpdateFromState()
   {
@@ -117,7 +150,10 @@ public partial class MainViewModel : ObservableObject
       IsPlayerTurn = false;
       PlayerValue = 0;
       DealerValue = 0;
+      DealerValueText = "";
       RoundStateText = "Idle";
+      IsSplitAvailable = false;
+      IsDoubleDownAvailable = false;
       PlayerCards.Clear();
       DealerCards.Clear();
       UpdateCommandStates();
@@ -127,8 +163,11 @@ public partial class MainViewModel : ObservableObject
     IsRoundActive = !_roundState.IsRoundOver;
     IsPlayerTurn = _roundState.IsPlayerTurn;
     PlayerValue = _roundState.Player.ActiveHand.BestValue;
-    DealerValue = _roundState.Dealer.ActiveHand.BestValue;
+    DealerValue = ResolveDealerValue(_roundState);
+    DealerValueText = ResolveDealerValueText(_roundState);
     RoundStateText = ResolveRoundStateText(_roundState);
+    IsSplitAvailable = ResolveSplitAvailability(_roundState);
+    IsDoubleDownAvailable = ResolveDoubleDownAvailability(_roundState);
 
     PlayerCards.Clear();
     foreach (var card in _roundState.Player.ActiveHand.Cards)
@@ -137,9 +176,9 @@ public partial class MainViewModel : ObservableObject
     }
 
     DealerCards.Clear();
-    foreach (var card in _roundState.Dealer.ActiveHand.Cards)
+    foreach (var cardLabel in BuildDealerCardList(_roundState))
     {
-      DealerCards.Add(FormatCard(card));
+      DealerCards.Add(cardLabel);
     }
 
     UpdateCommandStates();
@@ -167,6 +206,47 @@ public partial class MainViewModel : ObservableObject
     return $"{card.Rank} of {card.Suit}";
   }
 
+  private static IEnumerable<string> BuildDealerCardList(RoundState state)
+  {
+    var dealerCards = state.Dealer.ActiveHand.Cards;
+
+    if (state.IsRoundOver || !state.IsPlayerTurn)
+    {
+      return dealerCards.Select(FormatCard);
+    }
+
+    if (dealerCards.Count == 0)
+    {
+      return Array.Empty<string>();
+    }
+
+    return new[] { FormatCard(dealerCards[0]), "Hidden" };
+  }
+
+  private static int ResolveDealerValue(RoundState state)
+  {
+    var dealerHand = state.Dealer.ActiveHand;
+
+    if (state.IsRoundOver || !state.IsPlayerTurn)
+    {
+      return dealerHand.BestValue;
+    }
+
+    if (dealerHand.Cards.Count == 0)
+    {
+      return 0;
+    }
+
+    return dealerHand.Cards[0].BaseValue;
+  }
+
+  private static string ResolveDealerValueText(RoundState state)
+  {
+    return state.IsRoundOver || !state.IsPlayerTurn
+      ? $"Value: {state.Dealer.ActiveHand.BestValue}"
+      : "Value: Hidden";
+  }
+
   private static string ResolveRoundStateText(RoundState state)
   {
     if (state.IsRoundOver)
@@ -177,10 +257,34 @@ public partial class MainViewModel : ObservableObject
     return state.IsPlayerTurn ? "Player turn" : "Dealer turn";
   }
 
+  private static bool ResolveSplitAvailability(RoundState state)
+  {
+    if (state.IsRoundOver || !state.IsPlayerTurn)
+    {
+      return false;
+    }
+
+    var cards = state.Player.ActiveHand.Cards;
+
+    return cards.Count == 2 && cards[0].Rank == cards[1].Rank;
+  }
+
+  private static bool ResolveDoubleDownAvailability(RoundState state)
+  {
+    if (state.IsRoundOver || !state.IsPlayerTurn)
+    {
+      return false;
+    }
+
+    return state.Player.ActiveHand.Cards.Count == 2;
+  }
+
   private void UpdateCommandStates()
   {
     HitCommand.NotifyCanExecuteChanged();
     StandCommand.NotifyCanExecuteChanged();
     FinishRoundCommand.NotifyCanExecuteChanged();
+    DoubleDownCommand.NotifyCanExecuteChanged();
+    SplitCommand.NotifyCanExecuteChanged();
   }
 }
