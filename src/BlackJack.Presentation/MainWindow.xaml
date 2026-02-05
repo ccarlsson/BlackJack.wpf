@@ -3,12 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:viewModels="clr-namespace:BlackJack.Presentation.ViewModels"
         mc:Ignorable="d"
         Title="{Binding Title}"
         Height="560"
         Width="980"
         Background="#0B1117">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="36"
+                            CornerRadius="12"
+                            GlassFrameThickness="0"
+                            ResizeBorderThickness="6"/>
+    </shell:WindowChrome.WindowChrome>
     <Window.DataContext>
         <viewModels:MainViewModel/>
     </Window.DataContext>
@@ -23,18 +30,31 @@
         </Grid.Background>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="36"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding Title}"
+        <Border Grid.Row="0"
+                Background="Transparent"
+                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+            <TextBlock Text="{Binding Title}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextMuted}"
+                       VerticalAlignment="Center"
+                       Margin="8,0,0,0"/>
+        </Border>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding Title}"
                    FontSize="30"
                    FontWeight="SemiBold"
                    Foreground="{StaticResource Accent}"/>
 
-        <Border Grid.Row="1"
+        <Border Grid.Row="2"
                 Background="{StaticResource Panel}"
                 BorderBrush="#1E2A3A"
                 BorderThickness="1"
@@ -70,7 +90,7 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="2" Margin="0,18,0,0">
+        <Grid Grid.Row="3" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -105,10 +125,14 @@
             </Border>
         </Grid>
 
-        <StackPanel Grid.Row="3"
-                Orientation="Horizontal"
-                HorizontalAlignment="Left"
-                Margin="0,18,0,0">
+        <Grid Grid.Row="4" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Left">
             <Button Content="New round"
                     Command="{Binding NewRoundCommand}"
                     Margin="0,0,12,0"/>
@@ -128,6 +152,13 @@
                     Command="{Binding FinishRoundCommand}"
                 Background="#1F2E3D"
                 BorderBrush="#2F3F55"/>
-        </StackPanel>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                Content="Exit"
+                    Command="{Binding ExitCommand}"
+                Background="#2A1A20"
+                BorderBrush="#3B1F28"/>
+        </Grid>
     </Grid>
 </Window>

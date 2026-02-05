@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BlackJack.Application;
@@ -160,6 +161,21 @@ public partial class MainViewModel : ObservableObject
     _roundState = _gameService.PlayerSplit(_roundState);
     UpdateFromState();
     StatusText = "Split completed.";
+  }
+
+  [RelayCommand]
+  private void Exit()
+  {
+    var result = MessageBox.Show(
+      "Do you want to exit the game?",
+      "Exit",
+      MessageBoxButton.YesNo,
+      MessageBoxImage.Question);
+
+    if (result == MessageBoxResult.Yes)
+    {
+      System.Windows.Application.Current?.MainWindow?.Close();
+    }
   }
 
   private bool CanHit() => _roundState is not null && IsRoundActive && IsPlayerTurn;
