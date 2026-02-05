@@ -5,6 +5,7 @@ namespace BlackJack.Application;
 public sealed class RoundState
 {
   private readonly HashSet<int> _lockedHandIndices = new();
+  private readonly List<decimal> _handBets = new();
 
   public RoundState(
     Shoe shoe,
@@ -15,7 +16,8 @@ public sealed class RoundState
     bool allowTenValueSplit,
     bool allowResplitAces,
     bool restrictSplitAcesToOneCard,
-    bool allowDoubleDownAfterSplitAces)
+    bool allowDoubleDownAfterSplitAces,
+    decimal baseBet)
   {
     Shoe = shoe ?? throw new ArgumentNullException(nameof(shoe));
     Player = player ?? throw new ArgumentNullException(nameof(player));
@@ -26,6 +28,8 @@ public sealed class RoundState
     AllowResplitAces = allowResplitAces;
     RestrictSplitAcesToOneCard = restrictSplitAcesToOneCard;
     AllowDoubleDownAfterSplitAces = allowDoubleDownAfterSplitAces;
+    BaseBet = baseBet;
+    _handBets.Add(baseBet);
     IsPlayerTurn = true;
   }
 
@@ -47,6 +51,10 @@ public sealed class RoundState
 
   public bool AllowDoubleDownAfterSplitAces { get; }
 
+  public decimal BaseBet { get; }
+
+  public IReadOnlyList<decimal> HandBets => _handBets;
+
   public bool IsPlayerTurn { get; internal set; }
 
   public bool IsRoundOver { get; internal set; }
@@ -56,4 +64,8 @@ public sealed class RoundState
   public bool IsHandLocked(int index) => _lockedHandIndices.Contains(index);
 
   internal void LockHand(int index) => _lockedHandIndices.Add(index);
+
+  internal void AddHandBet(decimal bet) => _handBets.Add(bet);
+
+  internal void IncreaseHandBet(int index, decimal amount) => _handBets[index] += amount;
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,6 +16,7 @@ public partial class MainViewModel : ObservableObject
   private readonly GameSettings _settings;
   private RoundState? _roundState;
   private RoundResult? _lastResult;
+  private decimal _currentBet;
 
   public MainViewModel()
     : this(new GameService(), new RandomProvider(), GameSettings.Default)
@@ -32,6 +34,9 @@ public partial class MainViewModel : ObservableObject
     RoundStateText = "Idle";
     DeckCount = _settings.DeckCount;
     StandOnSoft17 = _settings.StandOnSoft17;
+    Bankroll = _settings.StartingBalance;
+    BetText = _settings.MinBet.ToString("0", CultureInfo.CurrentCulture);
+    _currentBet = _settings.MinBet;
   }
 
   public ObservableCollection<PlayerHandViewModel> PlayerHands { get; } = new();
@@ -59,6 +64,15 @@ public partial class MainViewModel : ObservableObject
   private string _deckCountError = "";
 
   [ObservableProperty]
+  private decimal _bankroll;
+
+  [ObservableProperty]
+  private string _betText = "";
+
+  [ObservableProperty]
+  private string _betError = "";
+
+  [ObservableProperty]
   private bool _standOnSoft17;
 
   [ObservableProperty]
@@ -84,6 +98,17 @@ public partial class MainViewModel : ObservableObject
   [RelayCommand]
   private void NewRound()
   {
+    if (!TryGetValidBet(out var bet))
+    {
+      return;
+    }
+
+    if (bet > Bankroll)
+    {
+      BetError = "Bet exceeds available balance.";
+      return;
+    }
+
     var settings = new GameSettings(
       DeckCount,
       StandOnSoft17,
@@ -91,15 +116,22 @@ public partial class MainViewModel : ObservableObject
       _settings.AllowTenValueSplit,
       _settings.AllowResplitAces,
       _settings.RestrictSplitAcesToOneCard,
-      _settings.AllowDoubleDownAfterSplitAces);
+      _settings.AllowDoubleDownAfterSplitAces,
+      _settings.MinBet,
+      _settings.MaxBet,
+      _settings.StartingBalance);
     _lastResult = null;
-    _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName);
+    Bankroll -= bet;
+    _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName, bet);
     if (_roundState.IsRoundOver)
     {
       _lastResult = _gameService.FinishRound(_roundState);
+      ApplyPayout(_lastResult, _roundState);
     }
     UpdateFromState();
-    StatusText = "New round started.";
+    StatusText = _roundState.IsRoundOver && _lastResult is not null
+      ? BuildRoundSummary(_lastResult)
+      : "New round started.";
   }
 
   [RelayCommand(CanExecute = nameof(CanHit))]
@@ -136,6 +168,7 @@ public partial class MainViewModel : ObservableObject
 
     var result = _gameService.FinishRound(_roundState);
     _lastResult = result;
+    ApplyPayout(result, _roundState);
     UpdateFromState();
     StatusText = BuildRoundSummary(result);
   }
@@ -148,7 +181,14 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
+    if (Bankroll < _roundState.BaseBet)
+    {
+      StatusText = "Not enough balance to double down.";
+      return;
+    }
+
     _roundState = _gameService.PlayerDoubleDown(_roundState);
+    Bankroll -= _roundState.BaseBet;
     UpdateFromState();
     StatusText = "Double down resolved.";
   }
@@ -161,7 +201,14 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
+    if (Bankroll < _roundState.BaseBet)
+    {
+      StatusText = "Not enough balance to split.";
+      return;
+    }
+
     _roundState = _gameService.PlayerSplit(_roundState);
+    Bankroll -= _roundState.BaseBet;
     UpdateFromState();
     StatusText = "Split completed.";
   }
@@ -187,9 +234,9 @@ public partial class MainViewModel : ObservableObject
 
   private bool CanFinishRound() => _roundState is not null && IsRoundActive && !IsPlayerTurn;
 
-  private bool CanDoubleDown() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable;
+  private bool CanDoubleDown() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable && Bankroll >= _roundState.BaseBet;
 
-  private bool CanSplit() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable;
+  private bool CanSplit() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable && Bankroll >= _roundState.BaseBet;
 
   private void UpdateFromState()
   {
@@ -356,6 +403,44 @@ public partial class MainViewModel : ObservableObject
     return "Round complete.";
   }
 
+  private void ApplyPayout(RoundResult result, RoundState state)
+  {
+    var net = 0m;
+
+    foreach (var handResult in result.HandResults)
+    {
+      if (handResult.HandIndex < 0 || handResult.HandIndex >= state.HandBets.Count)
+      {
+        continue;
+      }
+
+      net += handResult.PayoutMultiplier * state.HandBets[handResult.HandIndex];
+    }
+
+    Bankroll += net;
+  }
+
+  private bool TryGetValidBet(out decimal bet)
+  {
+    BetError = "";
+    bet = 0m;
+
+    if (!decimal.TryParse(BetText, NumberStyles.Number, CultureInfo.CurrentCulture, out bet))
+    {
+      BetError = "Enter a valid bet.";
+      return false;
+    }
+
+    if (bet < _settings.MinBet || bet > _settings.MaxBet)
+    {
+      BetError = $"Bet must be between {_settings.MinBet:0} and {_settings.MaxBet:0}.";
+      return false;
+    }
+
+    _currentBet = bet;
+    return true;
+  }
+
   private static bool ResolveSplitAvailability(RoundState state)
   {
     if (state.IsRoundOver || !state.IsPlayerTurn)
@@ -434,5 +519,16 @@ public partial class MainViewModel : ObservableObject
     }
 
     DeckCountError = "";
+  }
+
+  partial void OnBetTextChanged(string value)
+  {
+    if (string.IsNullOrWhiteSpace(value))
+    {
+      BetError = "";
+      return;
+    }
+
+    TryGetValidBet(out _);
   }
 }

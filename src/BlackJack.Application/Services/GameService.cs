@@ -4,7 +4,7 @@ namespace BlackJack.Application;
 
 public sealed class GameService : IGameService
 {
-  public RoundState StartNewRound(GameSettings settings, IRandomProvider randomProvider, string playerName)
+  public RoundState StartNewRound(GameSettings settings, IRandomProvider randomProvider, string playerName, decimal baseBet)
   {
     if (settings is null)
     {
@@ -19,6 +19,11 @@ public sealed class GameService : IGameService
     if (string.IsNullOrWhiteSpace(playerName))
     {
       throw new ArgumentException("Player name is required.", nameof(playerName));
+    }
+
+    if (baseBet < settings.MinBet || baseBet > settings.MaxBet)
+    {
+      throw new ArgumentOutOfRangeException(nameof(baseBet));
     }
 
     var shoe = new Shoe(settings.DeckCount);
@@ -38,7 +43,8 @@ public sealed class GameService : IGameService
       settings.AllowTenValueSplit,
       settings.AllowResplitAces,
       settings.RestrictSplitAcesToOneCard,
-      settings.AllowDoubleDownAfterSplitAces);
+      settings.AllowDoubleDownAfterSplitAces,
+      baseBet);
 
     if (player.ActiveHand.IsBlackjack || dealer.ActiveHand.IsBlackjack)
     {
@@ -100,6 +106,7 @@ public sealed class GameService : IGameService
     }
 
     state.Player.ActiveHand.Add(state.Shoe.Draw());
+    state.IncreaseHandBet(state.Player.ActiveHandIndex, state.BaseBet);
     AdvancePlayerHand(state);
     return state;
   }
@@ -124,6 +131,7 @@ public sealed class GameService : IGameService
     var splitHand = new Hand();
     splitHand.Add(secondCard);
     state.Player.AddHand(splitHand);
+    state.AddHandBet(state.BaseBet);
 
     activeHand.Add(state.Shoe.Draw());
     splitHand.Add(state.Shoe.Draw());

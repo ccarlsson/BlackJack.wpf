@@ -4,7 +4,7 @@ namespace BlackJack.Application;
 
 public interface IGameService
 {
-  RoundState StartNewRound(GameSettings settings, IRandomProvider randomProvider, string playerName);
+  RoundState StartNewRound(GameSettings settings, IRandomProvider randomProvider, string playerName, decimal baseBet);
 
   RoundState PlayerHit(RoundState state);
 

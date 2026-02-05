@@ -10,8 +10,8 @@ public class GameServiceTests
   public void StartNewRound_DealsTwoCardsEach()
   {
     var service = new GameService();
-    var settings = new GameSettings(1, true, 4, true, true, true, false);
-    var state = service.StartNewRound(settings, new FixedRandomProvider(), "Tester");
+    var settings = new GameSettings(1, true, 4, true, true, true, false, 10m, 500m, 1000m);
+    var state = service.StartNewRound(settings, new FixedRandomProvider(), "Tester", 10m);
 
     Assert.Equal(2, state.Player.ActiveHand.Cards.Count);
     Assert.Equal(2, state.Dealer.ActiveHand.Cards.Count);
@@ -100,7 +100,8 @@ public class GameServiceTests
       allowTenValueSplit: true,
       allowResplitAces: true,
       restrictSplitAcesToOneCard: true,
-      allowDoubleDownAfterSplitAces: false);
+      allowDoubleDownAfterSplitAces: false,
+      baseBet: 10m);
   }
 
   private static RoundState BuildSplitState()
@@ -123,7 +124,8 @@ public class GameServiceTests
       allowTenValueSplit: true,
       allowResplitAces: true,
       restrictSplitAcesToOneCard: true,
-      allowDoubleDownAfterSplitAces: false);
+      allowDoubleDownAfterSplitAces: false,
+      baseBet: 10m);
   }
 
   private static RoundState BuildTenValueSplitState()
@@ -146,7 +148,8 @@ public class GameServiceTests
       allowTenValueSplit: true,
       allowResplitAces: true,
       restrictSplitAcesToOneCard: true,
-      allowDoubleDownAfterSplitAces: false);
+      allowDoubleDownAfterSplitAces: false,
+      baseBet: 10m);
   }
 
   private static RoundState BuildAceSplitState()
@@ -169,7 +172,8 @@ public class GameServiceTests
       allowTenValueSplit: true,
       allowResplitAces: true,
       restrictSplitAcesToOneCard: true,
-      allowDoubleDownAfterSplitAces: false);
+      allowDoubleDownAfterSplitAces: false,
+      baseBet: 10m);
   }
 
   private sealed class FixedRandomProvider : IRandomProvider
