@@ -16,6 +16,16 @@ public interface IGameSession
 
   RoundResult? LastResult { get; }
 
+  bool CanSplit { get; }
+
+  bool CanDoubleDown { get; }
+
+  bool IsDealerHoleCardHidden { get; }
+
+  int GetDealerVisibleValue();
+
+  IReadOnlyList<Card> GetDealerVisibleCards();
+
   void UpdateSettings(GameSettings settings);
 
   bool TryStartRound(string playerName, decimal bet, out string error);

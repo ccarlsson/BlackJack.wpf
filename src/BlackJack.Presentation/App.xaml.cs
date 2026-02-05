@@ -13,33 +13,34 @@ namespace BlackJack.Presentation;
 /// </summary>
 public partial class App : System.Windows.Application
 {
-	private ServiceProvider? _serviceProvider;
+  private ServiceProvider? _serviceProvider;
 
-	protected override void OnStartup(StartupEventArgs e)
-	{
-		base.OnStartup(e);
+  protected override void OnStartup(StartupEventArgs e)
+  {
+    base.OnStartup(e);
 
-		var services = new ServiceCollection();
+    var services = new ServiceCollection();
 
-		services.AddSingleton(GameSettings.Default);
-		services.AddSingleton<IGameService, GameService>();
-		services.AddSingleton<IRandomProvider, RandomProvider>();
-		services.AddSingleton<IGameSession, GameSession>();
-		services.AddSingleton<IExitService, ExitService>();
-		services.AddSingleton<MainViewModel>();
-		services.AddSingleton<MainWindow>();
+    services.AddSingleton(GameSettings.Default);
+    services.AddSingleton<IGameService, GameService>();
+    services.AddSingleton<IRandomProvider, RandomProvider>();
+    services.AddSingleton<IGameSession, GameSession>();
+    services.AddSingleton<IGameSettingsProvider, GameSettingsProvider>();
+    services.AddSingleton<IExitService, ExitService>();
+    services.AddSingleton<MainViewModel>();
+    services.AddSingleton<MainWindow>();
 
-		_serviceProvider = services.BuildServiceProvider();
+    _serviceProvider = services.BuildServiceProvider();
 
-		var window = _serviceProvider.GetRequiredService<MainWindow>();
-		window.DataContext = _serviceProvider.GetRequiredService<MainViewModel>();
-		window.Show();
-	}
+    var window = _serviceProvider.GetRequiredService<MainWindow>();
+    window.DataContext = _serviceProvider.GetRequiredService<MainViewModel>();
+    window.Show();
+  }
 
-	protected override void OnExit(ExitEventArgs e)
-	{
-		_serviceProvider?.Dispose();
-		base.OnExit(e);
-	}
+  protected override void OnExit(ExitEventArgs e)
+  {
+    _serviceProvider?.Dispose();
+    base.OnExit(e);
+  }
 }
 

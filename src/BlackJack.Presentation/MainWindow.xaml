@@ -101,19 +101,19 @@
                               IsEnabled="{Binding IsSettingsEnabled}"
                               Margin="24,0,0,0"/>
                     <TextBlock Text="Bet"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"
-                            Margin="24,0,0,0"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="24,0,0,0"/>
                     <TextBox Text="{Binding BetText, UpdateSourceTrigger=PropertyChanged}"
                              Width="100"
                              Margin="12,0,0,0"
                              IsEnabled="{Binding IsSettingsEnabled}"/>
                     <TextBlock Text="Balance"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"
-                            Margin="24,0,0,0"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="24,0,0,0"/>
                     <TextBlock Text="{Binding Bankroll, StringFormat={}{0:C}}"
-                            Margin="8,0,0,0"/>
+                               Margin="8,0,0,0"/>
                 </StackPanel>
                 <TextBlock Text="{Binding DeckCountError}"
                            Foreground="#E85D75"

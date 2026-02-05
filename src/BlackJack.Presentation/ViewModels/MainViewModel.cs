@@ -12,17 +12,20 @@ public partial class MainViewModel : ObservableObject
 {
   private readonly IGameSession _session;
   private readonly IExitService _exitService;
+  private readonly IGameSettingsProvider _settingsProvider;
 
-  public MainViewModel(IGameSession session, IExitService exitService)
+  public MainViewModel(IGameSession session, IExitService exitService, IGameSettingsProvider settingsProvider)
   {
     _session = session ?? throw new ArgumentNullException(nameof(session));
     _exitService = exitService ?? throw new ArgumentNullException(nameof(exitService));
+    _settingsProvider = settingsProvider ?? throw new ArgumentNullException(nameof(settingsProvider));
 
+    var defaults = _settingsProvider.Defaults;
     PlayerName = "Player";
     StatusText = _session.Status;
     RoundStateText = "Idle";
-    DeckCount = GameSettings.Default.DeckCount;
-    StandOnSoft17 = GameSettings.Default.StandOnSoft17;
+    DeckCount = defaults.DeckCount;
+    StandOnSoft17 = defaults.StandOnSoft17;
     Bankroll = _session.Bankroll;
     BetText = _session.MinBet.ToString("0", CultureInfo.CurrentCulture);
   }
@@ -91,17 +94,18 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
+    var defaults = _settingsProvider.Defaults;
     var settings = new GameSettings(
       DeckCount,
       StandOnSoft17,
-      GameSettings.Default.MaxHands,
-      GameSettings.Default.AllowTenValueSplit,
-      GameSettings.Default.AllowResplitAces,
-      GameSettings.Default.RestrictSplitAcesToOneCard,
-      GameSettings.Default.AllowDoubleDownAfterSplitAces,
+      defaults.MaxHands,
+      defaults.AllowTenValueSplit,
+      defaults.AllowResplitAces,
+      defaults.RestrictSplitAcesToOneCard,
+      defaults.AllowDoubleDownAfterSplitAces,
       _session.MinBet,
       _session.MaxBet,
-      GameSettings.Default.StartingBalance);
+      defaults.StartingBalance);
     _session.UpdateSettings(settings);
 
     if (!_session.TryStartRound(PlayerName, bet, out var error))
@@ -189,9 +193,9 @@ public partial class MainViewModel : ObservableObject
 
   private bool CanStand() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn;
 
-  private bool CanDoubleDown() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable && Bankroll >= _session.RoundState.BaseBet;
+  private bool CanDoubleDown() => _session.CanDoubleDown;
 
-  private bool CanSplit() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable && Bankroll >= _session.RoundState.BaseBet;
+  private bool CanSplit() => _session.CanSplit;
 
   private void UpdateFromState()
   {
@@ -218,11 +222,13 @@ public partial class MainViewModel : ObservableObject
 
     IsRoundActive = !roundState.IsRoundOver;
     IsPlayerTurn = roundState.IsPlayerTurn;
-    DealerValue = ResolveDealerValue(roundState);
-    DealerValueText = ResolveDealerValueText(roundState);
+    DealerValue = _session.GetDealerVisibleValue();
+    DealerValueText = _session.IsDealerHoleCardHidden
+      ? "Value: Hidden"
+      : $"Value: {DealerValue}";
     RoundStateText = ResolveRoundStateText(roundState);
-    IsSplitAvailable = ResolveSplitAvailability(roundState);
-    IsDoubleDownAvailable = ResolveDoubleDownAvailability(roundState);
+    IsSplitAvailable = _session.CanSplit;
+    IsDoubleDownAvailable = _session.CanDoubleDown;
 
     PlayerHands.Clear();
     for (var index = 0; index < roundState.Player.Hands.Count; index++)
@@ -235,9 +241,14 @@ public partial class MainViewModel : ObservableObject
     }
 
     DealerCards.Clear();
-    foreach (var cardLabel in BuildDealerCardList(roundState))
+    foreach (var card in _session.GetDealerVisibleCards())
     {
-      DealerCards.Add(cardLabel);
+      DealerCards.Add(FormatCard(card));
+    }
+
+    if (_session.IsDealerHoleCardHidden)
+    {
+      DealerCards.Add("Hidden");
     }
 
     UpdateCommandStates();
@@ -248,46 +259,6 @@ public partial class MainViewModel : ObservableObject
     return $"{card.Rank} of {card.Suit}";
   }
 
-  private static IEnumerable<string> BuildDealerCardList(RoundState state)
-  {
-    var dealerCards = state.Dealer.ActiveHand.Cards;
-
-    if (state.IsRoundOver || !state.IsPlayerTurn)
-    {
-      return dealerCards.Select(FormatCard);
-    }
-
-    if (dealerCards.Count == 0)
-    {
-      return Array.Empty<string>();
-    }
-
-    return new[] { FormatCard(dealerCards[0]), "Hidden" };
-  }
-
-  private static int ResolveDealerValue(RoundState state)
-  {
-    var dealerHand = state.Dealer.ActiveHand;
-
-    if (state.IsRoundOver || !state.IsPlayerTurn)
-    {
-      return dealerHand.BestValue;
-    }
-
-    if (dealerHand.Cards.Count == 0)
-    {
-      return 0;
-    }
-
-    return dealerHand.Cards[0].BaseValue;
-  }
-
-  private static string ResolveDealerValueText(RoundState state)
-  {
-    return state.IsRoundOver || !state.IsPlayerTurn
-      ? $"Value: {state.Dealer.ActiveHand.BestValue}"
-      : "Value: Hidden";
-  }
 
   private static string ResolveRoundStateText(RoundState state)
   {
@@ -360,57 +331,6 @@ public partial class MainViewModel : ObservableObject
     return true;
   }
 
-  private static bool ResolveSplitAvailability(RoundState state)
-  {
-    if (state.IsRoundOver || !state.IsPlayerTurn)
-    {
-      return false;
-    }
-
-    var cards = state.Player.ActiveHand.Cards;
-
-    if (state.Player.Hands.Count >= state.MaxHands)
-    {
-      return false;
-    }
-
-    if (cards.Count != 2)
-    {
-      return false;
-    }
-
-    var sameRank = cards[0].Rank == cards[1].Rank;
-    var tenValuePair = state.AllowTenValueSplit && cards[0].BaseValue == 10 && cards[1].BaseValue == 10;
-    var isAcePair = cards[0].Rank == Rank.Ace && cards[1].Rank == Rank.Ace;
-    var canByValue = sameRank || tenValuePair;
-
-    if (!canByValue)
-    {
-      return false;
-    }
-
-    if (state.IsHandLocked(state.Player.ActiveHandIndex))
-    {
-      return state.AllowResplitAces && isAcePair;
-    }
-
-    return true;
-  }
-
-  private static bool ResolveDoubleDownAvailability(RoundState state)
-  {
-    if (state.IsRoundOver || !state.IsPlayerTurn)
-    {
-      return false;
-    }
-
-    if (state.IsHandLocked(state.Player.ActiveHandIndex))
-    {
-      return state.AllowDoubleDownAfterSplitAces && state.Player.ActiveHand.Cards.Count == 2;
-    }
-
-    return state.Player.ActiveHand.Cards.Count == 2;
-  }
 
   private void UpdateCommandStates()
   {
