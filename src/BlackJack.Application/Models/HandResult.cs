@@ -8,4 +8,5 @@ public sealed record HandResult(
   bool PlayerBlackjack,
   bool DealerBlackjack,
   bool PlayerBust,
-  bool DealerBust);
+  bool DealerBust,
+  decimal PayoutMultiplier);

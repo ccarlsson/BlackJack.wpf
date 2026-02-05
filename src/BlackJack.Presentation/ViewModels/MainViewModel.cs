@@ -144,8 +144,7 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
-    _roundState = _gameService.PlayerHit(_roundState);
-    _roundState = _gameService.PlayerStand(_roundState);
+    _roundState = _gameService.PlayerDoubleDown(_roundState);
     UpdateFromState();
     StatusText = "Double down resolved.";
   }

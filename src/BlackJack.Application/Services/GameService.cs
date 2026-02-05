@@ -85,6 +85,25 @@ public sealed class GameService : IGameService
     return state;
   }
 
+  public RoundState PlayerDoubleDown(RoundState state)
+  {
+    if (state is null)
+    {
+      throw new ArgumentNullException(nameof(state));
+    }
+
+    EnsurePlayerTurn(state);
+
+    if (!CanDoubleDown(state))
+    {
+      throw new InvalidOperationException("Double down is not available.");
+    }
+
+    state.Player.ActiveHand.Add(state.Shoe.Draw());
+    AdvancePlayerHand(state);
+    return state;
+  }
+
   public RoundState PlayerSplit(RoundState state)
   {
     if (state is null)
@@ -213,6 +232,21 @@ public sealed class GameService : IGameService
     return true;
   }
 
+  private static bool CanDoubleDown(RoundState state)
+  {
+    if (state.Player.ActiveHand.Cards.Count != 2)
+    {
+      return false;
+    }
+
+    if (state.IsHandLocked(state.Player.ActiveHandIndex))
+    {
+      return state.AllowDoubleDownAfterSplitAces;
+    }
+
+    return true;
+  }
+
   private static void DealerPlay(RoundState state)
   {
     var dealerHand = state.Dealer.ActiveHand;
@@ -239,6 +273,7 @@ public sealed class GameService : IGameService
       var playerBlackjack = hand.IsBlackjack;
 
       var outcome = EvaluateOutcome(playerValue, dealerValue, playerBust, dealerBust, playerBlackjack, dealerBlackjack);
+      var payoutMultiplier = ResolvePayoutMultiplier(outcome, playerBlackjack, dealerBlackjack);
 
       results.Add(new HandResult(
         index,
@@ -248,7 +283,8 @@ public sealed class GameService : IGameService
         playerBlackjack,
         dealerBlackjack,
         playerBust,
-        dealerBust));
+        dealerBust,
+        payoutMultiplier));
     }
 
     return new RoundResult(results);
@@ -298,5 +334,25 @@ public sealed class GameService : IGameService
     }
 
     return OutcomeType.Push;
+  }
+
+  private static decimal ResolvePayoutMultiplier(OutcomeType outcome, bool playerBlackjack, bool dealerBlackjack)
+  {
+    if (outcome == OutcomeType.Push)
+    {
+      return 0m;
+    }
+
+    if (outcome == OutcomeType.PlayerWin)
+    {
+      if (playerBlackjack && !dealerBlackjack)
+      {
+        return 1.5m;
+      }
+
+      return 1m;
+    }
+
+    return -1m;
   }
 }

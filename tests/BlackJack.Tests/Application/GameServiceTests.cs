@@ -176,4 +176,14 @@ public class GameServiceTests
   {
     public int Next(int minInclusive, int maxExclusive) => minInclusive;
   }
+
+  [Fact]
+  public void PlayerDoubleDown_ThrowsWhenHandLocked()
+  {
+    var service = new GameService();
+    var state = BuildAceSplitState();
+    var splitState = service.PlayerSplit(state);
+
+    Assert.Throws<InvalidOperationException>(() => service.PlayerDoubleDown(splitState));
+  }
 }
