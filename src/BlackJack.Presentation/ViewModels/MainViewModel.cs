@@ -1,42 +1,30 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BlackJack.Application;
 using BlackJack.Domain;
-using BlackJack.Infrastructure;
+using BlackJack.Presentation.Services;
 
 namespace BlackJack.Presentation.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-  private readonly IGameService _gameService;
-  private readonly IRandomProvider _randomProvider;
-  private readonly GameSettings _settings;
-  private RoundState? _roundState;
-  private RoundResult? _lastResult;
-  private decimal _currentBet;
+  private readonly IGameSession _session;
+  private readonly IExitService _exitService;
 
-  public MainViewModel()
-    : this(new GameService(), new RandomProvider(), GameSettings.Default)
+  public MainViewModel(IGameSession session, IExitService exitService)
   {
-  }
-
-  public MainViewModel(IGameService gameService, IRandomProvider randomProvider, GameSettings settings)
-  {
-    _gameService = gameService ?? throw new ArgumentNullException(nameof(gameService));
-    _randomProvider = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
-    _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    _session = session ?? throw new ArgumentNullException(nameof(session));
+    _exitService = exitService ?? throw new ArgumentNullException(nameof(exitService));
 
     PlayerName = "Player";
-    StatusText = "Select 'New round' to start.";
+    StatusText = _session.Status;
     RoundStateText = "Idle";
-    DeckCount = _settings.DeckCount;
-    StandOnSoft17 = _settings.StandOnSoft17;
-    Bankroll = _settings.StartingBalance;
-    BetText = _settings.MinBet.ToString("0", CultureInfo.CurrentCulture);
-    _currentBet = _settings.MinBet;
+    DeckCount = GameSettings.Default.DeckCount;
+    StandOnSoft17 = GameSettings.Default.StandOnSoft17;
+    Bankroll = _session.Bankroll;
+    BetText = _session.MinBet.ToString("0", CultureInfo.CurrentCulture);
   }
 
   public ObservableCollection<PlayerHandViewModel> PlayerHands { get; } = new();
@@ -103,132 +91,117 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
-    if (bet > Bankroll)
-    {
-      BetError = "Bet exceeds available balance.";
-      return;
-    }
-
     var settings = new GameSettings(
       DeckCount,
       StandOnSoft17,
-      _settings.MaxHands,
-      _settings.AllowTenValueSplit,
-      _settings.AllowResplitAces,
-      _settings.RestrictSplitAcesToOneCard,
-      _settings.AllowDoubleDownAfterSplitAces,
-      _settings.MinBet,
-      _settings.MaxBet,
-      _settings.StartingBalance);
-    _lastResult = null;
-    Bankroll -= bet;
-    _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName, bet);
-    if (_roundState.IsRoundOver)
+      GameSettings.Default.MaxHands,
+      GameSettings.Default.AllowTenValueSplit,
+      GameSettings.Default.AllowResplitAces,
+      GameSettings.Default.RestrictSplitAcesToOneCard,
+      GameSettings.Default.AllowDoubleDownAfterSplitAces,
+      _session.MinBet,
+      _session.MaxBet,
+      GameSettings.Default.StartingBalance);
+    _session.UpdateSettings(settings);
+
+    if (!_session.TryStartRound(PlayerName, bet, out var error))
     {
-      _lastResult = _gameService.ResolveRound(_roundState);
-      ApplyPayout(_lastResult, _roundState);
+      BetError = error;
+      Bankroll = _session.Bankroll;
+      StatusText = _session.Status;
+      return;
     }
+
     UpdateFromState();
-    StatusText = _roundState.IsRoundOver && _lastResult is not null
-      ? BuildRoundSummary(_lastResult)
-      : "New round started.";
   }
 
   [RelayCommand(CanExecute = nameof(CanHit))]
   private void Hit()
   {
-    if (_roundState is null)
+    if (_session.RoundState is null)
     {
       return;
     }
 
-    _roundState = _gameService.PlayerHit(_roundState);
+    _session.Hit();
     UpdateFromState();
-    TryAutoResolveRound();
   }
 
   [RelayCommand(CanExecute = nameof(CanStand))]
   private void Stand()
   {
-    if (_roundState is null)
+    if (_session.RoundState is null)
     {
       return;
     }
 
-    _roundState = _gameService.PlayerStand(_roundState);
+    _session.Stand();
     UpdateFromState();
-    TryAutoResolveRound();
   }
 
 
   [RelayCommand(CanExecute = nameof(CanDoubleDown))]
   private void DoubleDown()
   {
-    if (_roundState is null)
+    if (_session.RoundState is null)
     {
       return;
     }
 
-    if (Bankroll < _roundState.BaseBet)
+    if (!_session.TryDoubleDown(out var error))
     {
-      StatusText = "Not enough balance to double down.";
+      StatusText = error;
+      UpdateFromState();
       return;
     }
 
-    _roundState = _gameService.PlayerDoubleDown(_roundState);
-    Bankroll -= _roundState.BaseBet;
     UpdateFromState();
-    StatusText = "Double down resolved.";
-    TryAutoResolveRound();
   }
 
   [RelayCommand(CanExecute = nameof(CanSplit))]
   private void Split()
   {
-    if (_roundState is null)
+    if (_session.RoundState is null)
     {
       return;
     }
 
-    if (Bankroll < _roundState.BaseBet)
+    if (!_session.TrySplit(out var error))
     {
-      StatusText = "Not enough balance to split.";
+      StatusText = error;
+      UpdateFromState();
       return;
     }
 
-    _roundState = _gameService.PlayerSplit(_roundState);
-    Bankroll -= _roundState.BaseBet;
     UpdateFromState();
-    StatusText = "Split completed.";
   }
 
   [RelayCommand]
   private void Exit()
   {
-    var result = MessageBox.Show(
-      "Do you want to exit the game?",
-      "Exit",
-      MessageBoxButton.YesNo,
-      MessageBoxImage.Question);
-
-    if (result == MessageBoxResult.Yes)
+    if (_exitService.ConfirmExit())
     {
-      System.Windows.Application.Current?.MainWindow?.Close();
+      _exitService.Exit();
     }
   }
 
-  private bool CanHit() => _roundState is not null && IsRoundActive && IsPlayerTurn;
+  private bool CanHit() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn;
 
-  private bool CanStand() => _roundState is not null && IsRoundActive && IsPlayerTurn;
+  private bool CanStand() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn;
 
+  private bool CanDoubleDown() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable && Bankroll >= _session.RoundState.BaseBet;
 
-  private bool CanDoubleDown() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable && Bankroll >= _roundState.BaseBet;
-
-  private bool CanSplit() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable && Bankroll >= _roundState.BaseBet;
+  private bool CanSplit() => _session.RoundState is not null && IsRoundActive && IsPlayerTurn && IsSplitAvailable && Bankroll >= _session.RoundState.BaseBet;
 
   private void UpdateFromState()
   {
-    if (_roundState is null)
+    var roundState = _session.RoundState;
+    var lastResult = _session.LastResult;
+
+    Bankroll = _session.Bankroll;
+    StatusText = _session.Status;
+
+    if (roundState is null)
     {
       IsRoundActive = false;
       IsPlayerTurn = false;
@@ -243,33 +216,28 @@ public partial class MainViewModel : ObservableObject
       return;
     }
 
-    IsRoundActive = !_roundState.IsRoundOver;
-    IsPlayerTurn = _roundState.IsPlayerTurn;
-    DealerValue = ResolveDealerValue(_roundState);
-    DealerValueText = ResolveDealerValueText(_roundState);
-    RoundStateText = ResolveRoundStateText(_roundState);
-    IsSplitAvailable = ResolveSplitAvailability(_roundState);
-    IsDoubleDownAvailable = ResolveDoubleDownAvailability(_roundState);
+    IsRoundActive = !roundState.IsRoundOver;
+    IsPlayerTurn = roundState.IsPlayerTurn;
+    DealerValue = ResolveDealerValue(roundState);
+    DealerValueText = ResolveDealerValueText(roundState);
+    RoundStateText = ResolveRoundStateText(roundState);
+    IsSplitAvailable = ResolveSplitAvailability(roundState);
+    IsDoubleDownAvailable = ResolveDoubleDownAvailability(roundState);
 
     PlayerHands.Clear();
-    for (var index = 0; index < _roundState.Player.Hands.Count; index++)
+    for (var index = 0; index < roundState.Player.Hands.Count; index++)
     {
-      var hand = _roundState.Player.Hands[index];
+      var hand = roundState.Player.Hands[index];
       var cards = hand.Cards.Select(FormatCard).ToList();
-      var isActive = index == _roundState.Player.ActiveHandIndex;
-      var (outcomeText, outcomeTone, payoutText) = ResolveOutcomeText(_roundState, _lastResult, index);
+      var isActive = index == roundState.Player.ActiveHandIndex;
+      var (outcomeText, outcomeTone, payoutText) = ResolveOutcomeText(roundState, lastResult, index);
       PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, outcomeText, outcomeTone, payoutText, cards));
     }
 
     DealerCards.Clear();
-    foreach (var cardLabel in BuildDealerCardList(_roundState))
+    foreach (var cardLabel in BuildDealerCardList(roundState))
     {
       DealerCards.Add(cardLabel);
-    }
-
-    if (_roundState.IsRoundOver && _lastResult is not null)
-    {
-      StatusText = BuildRoundSummary(_lastResult);
     }
 
     UpdateCommandStates();
@@ -371,71 +339,6 @@ public partial class MainViewModel : ObservableObject
     return outcome;
   }
 
-  private static string BuildRoundSummary(RoundResult result)
-  {
-    if (result.HandResults.Count == 0)
-    {
-      return "Round complete.";
-    }
-
-    if (result.HandResults.Any(hand => hand.PlayerBlackjack && hand.Outcome == OutcomeType.PlayerWin))
-    {
-      return "Blackjack!";
-    }
-
-    if (result.HandResults.Any(hand => hand.PlayerBlackjack && hand.Outcome == OutcomeType.Push))
-    {
-      return "Blackjack push.";
-    }
-
-    return "Round complete.";
-  }
-
-  private void TryAutoResolveRound()
-  {
-    if (_roundState is null)
-    {
-      return;
-    }
-
-    if (_roundState.IsRoundOver || _roundState.IsPlayerTurn)
-    {
-      return;
-    }
-
-    ResolveRoundInternal();
-  }
-
-  private void ResolveRoundInternal()
-  {
-    if (_roundState is null)
-    {
-      return;
-    }
-
-    var result = _gameService.ResolveRound(_roundState);
-    _lastResult = result;
-    ApplyPayout(result, _roundState);
-    UpdateFromState();
-    StatusText = BuildRoundSummary(result);
-  }
-
-  private void ApplyPayout(RoundResult result, RoundState state)
-  {
-    var net = 0m;
-
-    foreach (var handResult in result.HandResults)
-    {
-      if (handResult.HandIndex < 0 || handResult.HandIndex >= state.HandBets.Count)
-      {
-        continue;
-      }
-
-      net += handResult.PayoutMultiplier * state.HandBets[handResult.HandIndex];
-    }
-
-    Bankroll += net;
-  }
 
   private bool TryGetValidBet(out decimal bet)
   {
@@ -448,13 +351,12 @@ public partial class MainViewModel : ObservableObject
       return false;
     }
 
-    if (bet < _settings.MinBet || bet > _settings.MaxBet)
+    if (bet < _session.MinBet || bet > _session.MaxBet)
     {
-      BetError = $"Bet must be between {_settings.MinBet:0} and {_settings.MaxBet:0}.";
+      BetError = $"Bet must be between {_session.MinBet:0} and {_session.MaxBet:0}.";
       return false;
     }
 
-    _currentBet = bet;
     return true;
   }
 

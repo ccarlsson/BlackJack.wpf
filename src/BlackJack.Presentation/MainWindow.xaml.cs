@@ -1,14 +1,16 @@
 ﻿using System.Windows;
+using BlackJack.Presentation.ViewModels;
 
 namespace BlackJack.Presentation;
 
 /// <summary>
-/// Interaktionslogik för MainWindow.xaml
+/// Interaction logic for MainWindow.xaml
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
     }
 }

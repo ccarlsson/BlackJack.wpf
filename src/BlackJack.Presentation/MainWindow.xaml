@@ -16,9 +16,7 @@
                             GlassFrameThickness="0"
                             ResizeBorderThickness="6"/>
     </shell:WindowChrome.WindowChrome>
-    <Window.DataContext>
-        <viewModels:MainViewModel/>
-    </Window.DataContext>
+
 
     <Grid Margin="24">
         <Grid.Background>
