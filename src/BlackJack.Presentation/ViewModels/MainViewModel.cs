@@ -28,11 +28,15 @@ public partial class MainViewModel : ObservableObject
     PlayerName = "Player";
     StatusText = "Select 'New round' to start.";
     RoundStateText = "Idle";
+    DeckCount = _settings.DeckCount;
+    StandOnSoft17 = _settings.StandOnSoft17;
   }
 
   public ObservableCollection<string> PlayerCards { get; } = new();
 
   public ObservableCollection<string> DealerCards { get; } = new();
+
+  public IReadOnlyList<int> DeckCounts { get; } = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8 };
 
   [ObservableProperty]
   private string _title = "Black Jack";
@@ -45,6 +49,15 @@ public partial class MainViewModel : ObservableObject
 
   [ObservableProperty]
   private string _playerName;
+
+  [ObservableProperty]
+  private int _deckCount;
+
+  [ObservableProperty]
+  private string _deckCountError = "";
+
+  [ObservableProperty]
+  private bool _standOnSoft17;
 
   [ObservableProperty]
   private int _playerValue;
@@ -61,6 +74,8 @@ public partial class MainViewModel : ObservableObject
   [ObservableProperty]
   private bool _isPlayerTurn;
 
+  public bool IsSettingsEnabled => !IsRoundActive;
+
   [ObservableProperty]
   private bool _isSplitAvailable;
 
@@ -70,7 +85,8 @@ public partial class MainViewModel : ObservableObject
   [RelayCommand]
   private void NewRound()
   {
-    _roundState = _gameService.StartNewRound(_settings, _randomProvider, PlayerName);
+    var settings = new GameSettings(DeckCount, StandOnSoft17);
+    _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName);
     UpdateFromState();
     StatusText = "New round started.";
   }
@@ -286,5 +302,24 @@ public partial class MainViewModel : ObservableObject
     FinishRoundCommand.NotifyCanExecuteChanged();
     DoubleDownCommand.NotifyCanExecuteChanged();
     SplitCommand.NotifyCanExecuteChanged();
+  }
+
+  partial void OnIsRoundActiveChanged(bool value)
+  {
+    OnPropertyChanged(nameof(IsSettingsEnabled));
+  }
+
+  partial void OnDeckCountChanged(int value)
+  {
+    var clamped = Math.Clamp(value, 1, 8);
+
+    if (clamped != value)
+    {
+      DeckCount = clamped;
+      DeckCountError = "Deck count must be between 1 and 8.";
+      return;
+    }
+
+    DeckCountError = "";
   }
 }

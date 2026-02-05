@@ -6,13 +6,22 @@
         xmlns:viewModels="clr-namespace:BlackJack.Presentation.ViewModels"
         mc:Ignorable="d"
         Title="{Binding Title}"
-        Height="500"
-        Width="900">
+        Height="560"
+        Width="980"
+        Background="#0B1117">
     <Window.DataContext>
         <viewModels:MainViewModel/>
     </Window.DataContext>
 
     <Grid Margin="24">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0B1117" Offset="0"/>
+                <GradientStop Color="#0E1722" Offset="0.5"/>
+                <GradientStop Color="#121B26" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,57 +30,71 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="{Binding Title}"
-                   FontSize="28"
-                   FontWeight="SemiBold"/>
+                   FontSize="30"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Accent}"/>
 
         <Border Grid.Row="1"
-                Background="#0F000000"
-                CornerRadius="12"
-                Padding="12"
+                Background="{StaticResource Panel}"
+                BorderBrush="#1E2A3A"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="14"
                 Margin="0,12,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Player" FontWeight="SemiBold"/>
+                    <TextBlock Text="Player" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
                     <TextBox Text="{Binding PlayerName}" Width="180" Margin="12,0,0,0"/>
-                    <TextBlock Text="Round:" Margin="24,0,0,0" FontWeight="SemiBold"/>
+                    <TextBlock Text="Round:" Margin="24,0,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
                     <TextBlock Text="{Binding RoundStateText}" Margin="8,0,0,0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="Status:" FontWeight="SemiBold"/>
+                    <TextBlock Text="Status:" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
                     <TextBlock Text="{Binding StatusText}" Margin="8,0,0,0"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Decks" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                    <ComboBox ItemsSource="{Binding DeckCounts}"
+                              SelectedItem="{Binding DeckCount}"
+                              Width="120"
+                              IsEnabled="{Binding IsSettingsEnabled}"
+                              Margin="12,0,0,0"/>
+                    <CheckBox Content="Stand on soft 17"
+                              IsChecked="{Binding StandOnSoft17}"
+                              IsEnabled="{Binding IsSettingsEnabled}"
+                              Margin="24,0,0,0"/>
+                </StackPanel>
+                <TextBlock Text="{Binding DeckCountError}"
+                           Foreground="#E85D75"
+                           Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="2" Margin="0,16,0,0">
+        <Grid Grid.Row="2" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Background="#0F000000" CornerRadius="12" Padding="16" Margin="0,0,12,0">
+            <Border Background="{StaticResource PanelAlt}" BorderBrush="#1E2A3A" BorderThickness="1" CornerRadius="14" Padding="16" Margin="0,0,12,0">
                 <StackPanel>
-                    <TextBlock Text="Player hand" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding PlayerValue, StringFormat=Value: {0}}" Margin="0,6,0,0"/>
+                    <TextBlock Text="Player hand" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                    <TextBlock Text="{Binding PlayerValue, StringFormat=Value: {0}}" Margin="0,6,0,0" FontSize="16"/>
                     <ItemsControl ItemsSource="{Binding PlayerCards}" Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" Margin="0,2,0,2"/>
-                            </DataTemplate>
+                            <StaticResource ResourceKey="CardTemplate"/>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Background="#0F000000" CornerRadius="12" Padding="16">
+            <Border Grid.Column="1" Background="{StaticResource PanelAlt}" BorderBrush="#1E2A3A" BorderThickness="1" CornerRadius="14" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Dealer hand" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding DealerValueText}" Margin="0,6,0,0"/>
+                    <TextBlock Text="Dealer hand" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                    <TextBlock Text="{Binding DealerValueText}" Margin="0,6,0,0" FontSize="16"/>
                     <ItemsControl ItemsSource="{Binding DealerCards}" Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" Margin="0,2,0,2"/>
-                            </DataTemplate>
+                            <StaticResource ResourceKey="CardTemplate"/>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
@@ -79,32 +102,28 @@
         </Grid>
 
         <StackPanel Grid.Row="3"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Left"
-                    Margin="0,16,0,0">
+                Orientation="Horizontal"
+                HorizontalAlignment="Left"
+                Margin="0,18,0,0">
             <Button Content="New round"
                     Command="{Binding NewRoundCommand}"
-                    Padding="16,8"
                     Margin="0,0,12,0"/>
             <Button Content="Hit"
                     Command="{Binding HitCommand}"
-                    Padding="16,8"
                     Margin="0,0,12,0"/>
             <Button Content="Stand"
                     Command="{Binding StandCommand}"
-                    Padding="16,8"
                     Margin="0,0,12,0"/>
             <Button Content="Double down"
                 Command="{Binding DoubleDownCommand}"
-                Padding="16,8"
                 Margin="0,0,12,0"/>
             <Button Content="Split"
                 Command="{Binding SplitCommand}"
-                Padding="16,8"
                 Margin="0,0,12,0"/>
             <Button Content="Finish round"
                     Command="{Binding FinishRoundCommand}"
-                    Padding="16,8"/>
+                Background="#1F2E3D"
+                BorderBrush="#2F3F55"/>
         </StackPanel>
     </Grid>
 </Window>
