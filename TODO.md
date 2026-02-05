@@ -1,10 +1,10 @@
-# TODO för BlackJackSRS
+# TODO for BlackJackSRS
 
-1. [ ] Definiera domänmodeller och gränssnitt i Domain-projektet (t.ex. Card, Hand, Player, IRandomProvider).
-2. [ ] Implementera applikationslogik och use cases i Application-projektet (t.ex. spelrundor, regler, logik).
-3. [ ] Skapa infrastrukturklasser i Infrastructure-projektet (t.ex. implementation av IRandomProvider, datahantering).
-4. [ ] Bygg grundläggande ViewModels i Presentation-projektet med CommunityToolkit.MVVM.
-5. [ ] Skapa grundläggande Views (XAML) och koppla till ViewModels (MVVM).
-6. [ ] Skriv och kör enhetstester i Tests-projektet för domän och applikationslogik.
-7. [ ] Iterera och bygg ut UI och funktionalitet stegvis.
-8. [ ] Verifiera att allt fungerar genom att bygga och testa hela lösningen.
+1. [ ] Define domain models and interfaces in the Domain project (e.g., `Card`, `Hand`, `Player`, `IRandomProvider`).
+2. [ ] Implement application logic and use cases in the Application project (e.g., rounds, rules, outcomes).
+3. [ ] Create infrastructure classes in the Infrastructure project (e.g., `IRandomProvider` implementation, external services).
+4. [ ] Build core ViewModels in the Presentation project with CommunityToolkit.MVVM.
+5. [ ] Create core Views (XAML) and bind them to ViewModels (MVVM).
+6. [ ] Write and run unit tests in the Tests project for domain and application logic.
+7. [ ] Iterate and expand UI and functionality step by step.
+8. [ ] Verify everything by building and testing the full solution.
