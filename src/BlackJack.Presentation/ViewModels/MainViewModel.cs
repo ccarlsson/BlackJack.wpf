@@ -5,15 +5,15 @@ namespace BlackJack.Presentation.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private string _titel = "Black Jack";
+  [ObservableProperty]
+  private string _title = "Black Jack";
 
-    [ObservableProperty]
-    private string _statusText = "Välj 'Ny runda' för att starta.";
+  [ObservableProperty]
+  private string _statusText = "Select 'New round' to start.";
 
-    [RelayCommand]
-    private void NyRunda()
-    {
-           StatusText = "Ny runda initierad (platshållare).";
-    }
+  [RelayCommand]
+  private void NewRound()
+  {
+    StatusText = "New round initialized (placeholder).";
+  }
 }

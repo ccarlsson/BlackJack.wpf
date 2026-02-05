@@ -10,4 +10,4 @@
 - Infrastructure-projektet innehåller implementationer för dataåtkomst och externa tjänster.
 - Tests-projektet innehåller enhetstester för övriga lager.
 - Använd C# 14 och .NET 10.
-- All kod och dokumentation ska vara på svenska där det är möjligt.
+- All kod och dokumentation ska vara på engelska.

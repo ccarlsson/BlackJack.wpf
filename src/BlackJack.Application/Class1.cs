@@ -1,6 +1,6 @@
 ﻿namespace BlackJack.Application;
 
-public interface ISpelService
+public interface IGameService
 {
-	string StartaNyRunda();
+  string StartNewRound();
 }

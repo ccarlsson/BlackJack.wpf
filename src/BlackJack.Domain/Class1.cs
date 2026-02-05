@@ -1,33 +1,33 @@
 ﻿namespace BlackJack.Domain;
 
-public enum Farg
+public enum Suit
 {
-	Hjarte,
-	Ruter,
-	Spader,
-	Klover
+  Hearts,
+  Diamonds,
+  Spades,
+  Clubs
 }
 
-public enum Valoer
+public enum Rank
 {
-	Tvaa = 2,
-	Tre = 3,
-	Fyra = 4,
-	Fem = 5,
-	Sex = 6,
-	Sju = 7,
-	Aatta = 8,
-	Nio = 9,
-	Tio = 10,
-	Knekt = 11,
-	Dam = 12,
-	Kung = 13,
-	Ess = 14
+  Two = 2,
+  Three = 3,
+  Four = 4,
+  Five = 5,
+  Six = 6,
+  Seven = 7,
+  Eight = 8,
+  Nine = 9,
+  Ten = 10,
+  Jack = 11,
+  Queen = 12,
+  King = 13,
+  Ace = 14
 }
 
-public sealed record Kort(Farg Farg, Valoer Valoer);
+public sealed record Card(Suit Suit, Rank Rank);
 
-public interface ISlumpProvider
+public interface IRandomProvider
 {
-	int Next(int minInclusive, int maxExclusive);
+  int Next(int minInclusive, int maxExclusive);
 }

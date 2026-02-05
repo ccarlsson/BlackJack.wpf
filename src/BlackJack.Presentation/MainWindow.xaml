@@ -5,33 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BlackJack.Presentation.ViewModels"
         mc:Ignorable="d"
-        Title="{Binding Titel}" Height="500" Width="900">
+        Title="{Binding Title}"
+        Height="500"
+        Width="900">
     <Window.DataContext>
-        <viewModels:MainViewModel />
+        <viewModels:MainViewModel/>
     </Window.DataContext>
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding Titel}"
+        <TextBlock Text="{Binding Title}"
                    FontSize="28"
-                   FontWeight="SemiBold" />
+                   FontWeight="SemiBold"/>
 
-        <Border Grid.Row="1" Background="#0F000000" CornerRadius="12" Padding="16">
+        <Border Grid.Row="1"
+                Background="#0F000000"
+                CornerRadius="12"
+                Padding="16">
             <StackPanel>
-                <TextBlock Text="Status" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding StatusText}" Margin="0,6,0,0" />
+                <TextBlock Text="Status"
+                           FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding StatusText}"
+                           Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,16,0,0">
-            <Button Content="Ny runda" Command="{Binding NyRundaCommand}" Padding="16,8" Margin="0,0,12,0" />
-            <Button Content="Inställningar" Padding="16,8" Margin="0,0,12,0" IsEnabled="False" />
-            <Button Content="Hjälp" Padding="16,8" IsEnabled="False" />
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Margin="0,16,0,0">
+            <Button Content="New round"
+                    Command="{Binding NewRoundCommand}"
+                    Padding="16,8"
+                    Margin="0,0,12,0"/>
+            <Button Content="Settings"
+                    Padding="16,8"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"/>
+            <Button Content="Help"
+                    Padding="16,8"
+                    IsEnabled="False"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -2,9 +2,9 @@
 
 namespace BlackJack.Infrastructure;
 
-public sealed class SlumpProvider : ISlumpProvider
+public sealed class RandomProvider : IRandomProvider
 {
-	private readonly Random _random = new();
+  private readonly Random _random = new();
 
-	public int Next(int minInclusive, int maxExclusive) => _random.Next(minInclusive, maxExclusive);
+  public int Next(int minInclusive, int maxExclusive) => _random.Next(minInclusive, maxExclusive);
 }
