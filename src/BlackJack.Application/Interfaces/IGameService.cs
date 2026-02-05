@@ -14,5 +14,5 @@ public interface IGameService
 
   RoundState PlayerSplit(RoundState state);
 
-  RoundResult FinishRound(RoundState state);
+  RoundResult ResolveRound(RoundState state);
 }

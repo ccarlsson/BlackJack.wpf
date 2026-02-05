@@ -23,13 +23,13 @@
     <Grid Margin="24">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0"
-                    EndPoint="1,1">
+                                 EndPoint="1,1">
                 <GradientStop Color="#0B1117"
-                        Offset="0"/>
+                              Offset="0"/>
                 <GradientStop Color="#0E1722"
-                        Offset="0.5"/>
+                              Offset="0.5"/>
                 <GradientStop Color="#121B26"
-                        Offset="1"/>
+                              Offset="1"/>
             </LinearGradientBrush>
         </Grid.Background>
 
@@ -68,31 +68,31 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Player"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <TextBox Text="{Binding PlayerName}"
-                            Width="180"
-                            Margin="12,0,0,0"/>
+                             Width="180"
+                             Margin="12,0,0,0"/>
                     <TextBlock Text="Round:"
-                            Margin="24,0,0,0"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               Margin="24,0,0,0"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <TextBlock Text="{Binding RoundStateText}"
-                            Margin="8,0,0,0"/>
+                               Margin="8,0,0,0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
-                        Margin="0,8,0,0">
+                            Margin="0,8,0,0">
                     <TextBlock Text="Status:"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <TextBlock Text="{Binding StatusText}"
-                            Margin="8,0,0,0"/>
+                               Margin="8,0,0,0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
-                        Margin="0,8,0,0">
+                            Margin="0,8,0,0">
                     <TextBlock Text="Decks"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <ComboBox ItemsSource="{Binding DeckCounts}"
                               SelectedItem="{Binding DeckCount}"
                               Width="120"
@@ -102,25 +102,32 @@
                               IsChecked="{Binding StandOnSoft17}"
                               IsEnabled="{Binding IsSettingsEnabled}"
                               Margin="24,0,0,0"/>
-                                        <TextBlock Text="Bet" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}" Margin="24,0,0,0"/>
-                                        <TextBox Text="{Binding BetText, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="100"
-                                                         Margin="12,0,0,0"
-                                                         IsEnabled="{Binding IsSettingsEnabled}"/>
-                                        <TextBlock Text="Balance" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}" Margin="24,0,0,0"/>
-                                        <TextBlock Text="{Binding Bankroll, StringFormat={}{0:C}}" Margin="8,0,0,0"/>
+                    <TextBlock Text="Bet"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"
+                            Margin="24,0,0,0"/>
+                    <TextBox Text="{Binding BetText, UpdateSourceTrigger=PropertyChanged}"
+                             Width="100"
+                             Margin="12,0,0,0"
+                             IsEnabled="{Binding IsSettingsEnabled}"/>
+                    <TextBlock Text="Balance"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"
+                            Margin="24,0,0,0"/>
+                    <TextBlock Text="{Binding Bankroll, StringFormat={}{0:C}}"
+                            Margin="8,0,0,0"/>
                 </StackPanel>
                 <TextBlock Text="{Binding DeckCountError}"
                            Foreground="#E85D75"
                            Margin="0,6,0,0"/>
-                                <TextBlock Text="{Binding BetError}"
-                                                   Foreground="#E85D75"
-                                                   Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding BetError}"
+                           Foreground="#E85D75"
+                           Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
 
         <Grid Grid.Row="3"
-                Margin="0,18,0,0">
+              Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -134,10 +141,10 @@
                     Margin="0,0,12,0">
                 <StackPanel>
                     <TextBlock Text="Player hands"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <ItemsControl ItemsSource="{Binding PlayerHands}"
-                            Margin="0,10,0,0">
+                                  Margin="0,10,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
@@ -158,13 +165,13 @@
                     Padding="16">
                 <StackPanel>
                     <TextBlock Text="Dealer hand"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextMuted}"/>
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"/>
                     <TextBlock Text="{Binding DealerValueText}"
-                            Margin="0,6,0,0"
-                            FontSize="16"/>
+                               Margin="0,6,0,0"
+                               FontSize="16"/>
                     <ItemsControl ItemsSource="{Binding DealerCards}"
-                            Margin="0,8,0,0">
+                                  Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
                             <StaticResource ResourceKey="CardTemplate"/>
                         </ItemsControl.ItemTemplate>
@@ -174,7 +181,7 @@
         </Grid>
 
         <Grid Grid.Row="4"
-                Margin="0,18,0,0">
+              Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -197,10 +204,6 @@
                 <Button Content="Split"
                         Command="{Binding SplitCommand}"
                         Margin="0,0,12,0"/>
-                <Button Content="Finish round"
-                        Command="{Binding FinishRoundCommand}"
-                        Background="#1F2E3D"
-                        BorderBrush="#2F3F55"/>
             </StackPanel>
 
             <Button Grid.Column="1"

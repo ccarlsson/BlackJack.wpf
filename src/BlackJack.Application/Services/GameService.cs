@@ -152,7 +152,7 @@ public sealed class GameService : IGameService
     return state;
   }
 
-  public RoundResult FinishRound(RoundState state)
+  public RoundResult ResolveRound(RoundState state)
   {
     if (state is null)
     {

@@ -125,7 +125,7 @@ public partial class MainViewModel : ObservableObject
     _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName, bet);
     if (_roundState.IsRoundOver)
     {
-      _lastResult = _gameService.FinishRound(_roundState);
+      _lastResult = _gameService.ResolveRound(_roundState);
       ApplyPayout(_lastResult, _roundState);
     }
     UpdateFromState();
@@ -144,6 +144,7 @@ public partial class MainViewModel : ObservableObject
 
     _roundState = _gameService.PlayerHit(_roundState);
     UpdateFromState();
+    TryAutoResolveRound();
   }
 
   [RelayCommand(CanExecute = nameof(CanStand))]
@@ -156,22 +157,9 @@ public partial class MainViewModel : ObservableObject
 
     _roundState = _gameService.PlayerStand(_roundState);
     UpdateFromState();
+    TryAutoResolveRound();
   }
 
-  [RelayCommand(CanExecute = nameof(CanFinishRound))]
-  private void FinishRound()
-  {
-    if (_roundState is null)
-    {
-      return;
-    }
-
-    var result = _gameService.FinishRound(_roundState);
-    _lastResult = result;
-    ApplyPayout(result, _roundState);
-    UpdateFromState();
-    StatusText = BuildRoundSummary(result);
-  }
 
   [RelayCommand(CanExecute = nameof(CanDoubleDown))]
   private void DoubleDown()
@@ -191,6 +179,7 @@ public partial class MainViewModel : ObservableObject
     Bankroll -= _roundState.BaseBet;
     UpdateFromState();
     StatusText = "Double down resolved.";
+    TryAutoResolveRound();
   }
 
   [RelayCommand(CanExecute = nameof(CanSplit))]
@@ -232,7 +221,6 @@ public partial class MainViewModel : ObservableObject
 
   private bool CanStand() => _roundState is not null && IsRoundActive && IsPlayerTurn;
 
-  private bool CanFinishRound() => _roundState is not null && IsRoundActive && !IsPlayerTurn;
 
   private bool CanDoubleDown() => _roundState is not null && IsRoundActive && IsPlayerTurn && IsDoubleDownAvailable && Bankroll >= _roundState.BaseBet;
 
@@ -403,6 +391,35 @@ public partial class MainViewModel : ObservableObject
     return "Round complete.";
   }
 
+  private void TryAutoResolveRound()
+  {
+    if (_roundState is null)
+    {
+      return;
+    }
+
+    if (_roundState.IsRoundOver || _roundState.IsPlayerTurn)
+    {
+      return;
+    }
+
+    ResolveRoundInternal();
+  }
+
+  private void ResolveRoundInternal()
+  {
+    if (_roundState is null)
+    {
+      return;
+    }
+
+    var result = _gameService.ResolveRound(_roundState);
+    _lastResult = result;
+    ApplyPayout(result, _roundState);
+    UpdateFromState();
+    StatusText = BuildRoundSummary(result);
+  }
+
   private void ApplyPayout(RoundResult result, RoundState state)
   {
     var net = 0m;
@@ -497,7 +514,6 @@ public partial class MainViewModel : ObservableObject
   {
     HitCommand.NotifyCanExecuteChanged();
     StandCommand.NotifyCanExecuteChanged();
-    FinishRoundCommand.NotifyCanExecuteChanged();
     DoubleDownCommand.NotifyCanExecuteChanged();
     SplitCommand.NotifyCanExecuteChanged();
   }

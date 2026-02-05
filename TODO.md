@@ -6,5 +6,5 @@
 4. [x] Build core ViewModels in the Presentation project with CommunityToolkit.MVVM.
 5. [x] Create core Views (XAML) and bind them to ViewModels (MVVM).
 6. [x] Write and run unit tests in the Tests project for domain and application logic.
-7. [ ] Iterate and expand UI and functionality step by step.
-8. [ ] Verify everything by building and testing the full solution.
+7. [x] Iterate and expand UI and functionality step by step.
+8. [x] Verify everything by building and testing the full solution.
