@@ -5,4 +5,10 @@
     <SolidColorBrush x:Key="Accent" Color="#2F9E44"/>
     <SolidColorBrush x:Key="Panel" Color="#121A23"/>
     <SolidColorBrush x:Key="PanelAlt" Color="#141F2B"/>
+    <SolidColorBrush x:Key="OutcomeWin" Color="#2F9E44"/>
+    <SolidColorBrush x:Key="OutcomeLose" Color="#E85D75"/>
+    <SolidColorBrush x:Key="OutcomePush" Color="#E0B84A"/>
+    <Color x:Key="OutcomeWinColor">#2F9E44</Color>
+    <Color x:Key="OutcomeLoseColor">#E85D75</Color>
+    <Color x:Key="OutcomePushColor">#E0B84A</Color>
 </ResourceDictionary>

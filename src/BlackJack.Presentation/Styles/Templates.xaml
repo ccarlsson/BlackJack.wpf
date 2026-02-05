@@ -69,11 +69,27 @@
         <TextBlock Text="{Binding ValueText}"
             Margin="0,6,0,0"
             FontSize="14"/>
-        <TextBlock x:Name="HandOutcome"
-          Text="{Binding OutcomeText}"
-          Margin="0,4,0,0"
-          Foreground="{StaticResource Accent}"
-          FontSize="12"/>
+        <Border x:Name="OutcomeChip"
+            Background="#18222E"
+            BorderBrush="#2A3A4D"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="6,2"
+            Margin="0,6,0,0"
+            HorizontalAlignment="Left">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="OutcomeIcon"
+                Text=""
+                Foreground="{StaticResource TextPrimary}"
+                FontWeight="Bold"
+                Margin="0,0,6,0"
+                FontSize="12"/>
+            <TextBlock x:Name="HandOutcome"
+                Text="{Binding OutcomeText}"
+                Foreground="{StaticResource TextPrimary}"
+                FontSize="12"/>
+          </StackPanel>
+        </Border>
         <ItemsControl ItemsSource="{Binding Cards}"
             Margin="0,8,0,0">
           <ItemsControl.ItemTemplate>
@@ -85,10 +101,82 @@
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding OutcomeText}"
           Value="">
-        <Setter TargetName="HandOutcome"
+        <Setter TargetName="OutcomeChip"
             Property="Visibility"
             Value="Collapsed"/>
       </DataTrigger>
+        <DataTrigger Binding="{Binding OutcomeTone}"
+          Value="Win">
+        <Setter TargetName="OutcomeChip"
+          Property="BorderBrush"
+          Value="{StaticResource OutcomeWin}"/>
+        <Setter TargetName="OutcomeChip"
+          Property="Background"
+          Value="#1A2A22"/>
+          <Setter TargetName="OutcomeChip"
+              Property="Effect">
+            <Setter.Value>
+              <DropShadowEffect Color="{StaticResource OutcomeWinColor}" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+            </Setter.Value>
+          </Setter>
+          <Setter TargetName="OutcomeIcon"
+            Property="Text"
+            Value="W"/>
+          <Setter TargetName="OutcomeIcon"
+            Property="Foreground"
+            Value="{StaticResource OutcomeWin}"/>
+        <Setter TargetName="HandOutcome"
+          Property="Foreground"
+          Value="{StaticResource OutcomeWin}"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding OutcomeTone}"
+          Value="Lose">
+        <Setter TargetName="OutcomeChip"
+          Property="BorderBrush"
+          Value="{StaticResource OutcomeLose}"/>
+        <Setter TargetName="OutcomeChip"
+          Property="Background"
+          Value="#2A1A20"/>
+          <Setter TargetName="OutcomeChip"
+              Property="Effect">
+            <Setter.Value>
+              <DropShadowEffect Color="{StaticResource OutcomeLoseColor}" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+            </Setter.Value>
+          </Setter>
+          <Setter TargetName="OutcomeIcon"
+            Property="Text"
+            Value="L"/>
+          <Setter TargetName="OutcomeIcon"
+            Property="Foreground"
+            Value="{StaticResource OutcomeLose}"/>
+        <Setter TargetName="HandOutcome"
+          Property="Foreground"
+          Value="{StaticResource OutcomeLose}"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding OutcomeTone}"
+          Value="Push">
+        <Setter TargetName="OutcomeChip"
+          Property="BorderBrush"
+          Value="{StaticResource OutcomePush}"/>
+        <Setter TargetName="OutcomeChip"
+          Property="Background"
+          Value="#2A261A"/>
+          <Setter TargetName="OutcomeChip"
+              Property="Effect">
+            <Setter.Value>
+              <DropShadowEffect Color="{StaticResource OutcomePushColor}" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+            </Setter.Value>
+          </Setter>
+          <Setter TargetName="OutcomeIcon"
+            Property="Text"
+            Value="P"/>
+          <Setter TargetName="OutcomeIcon"
+            Property="Foreground"
+            Value="{StaticResource OutcomePush}"/>
+        <Setter TargetName="HandOutcome"
+          Property="Foreground"
+          Value="{StaticResource OutcomePush}"/>
+        </DataTrigger>
       <DataTrigger Binding="{Binding IsActive}"
           Value="True">
         <Setter TargetName="HandFrame"
