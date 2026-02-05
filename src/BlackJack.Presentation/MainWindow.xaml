@@ -15,6 +15,7 @@
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -26,16 +27,58 @@
         <Border Grid.Row="1"
                 Background="#0F000000"
                 CornerRadius="12"
-                Padding="16">
+                Padding="12"
+                Margin="0,12,0,0">
             <StackPanel>
-                <TextBlock Text="Status"
-                           FontWeight="SemiBold"/>
-                <TextBlock Text="{Binding StatusText}"
-                           Margin="0,6,0,0"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Player" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding PlayerName}" Width="180" Margin="12,0,0,0"/>
+                    <TextBlock Text="Round:" Margin="24,0,0,0" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding RoundStateText}" Margin="8,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Status:" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding StatusText}" Margin="8,0,0,0"/>
+                </StackPanel>
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="2"
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Background="#0F000000" CornerRadius="12" Padding="16" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Text="Player hand" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding PlayerValue, StringFormat=Value: {0}}" Margin="0,6,0,0"/>
+                    <ItemsControl ItemsSource="{Binding PlayerCards}" Margin="0,8,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Margin="0,2,0,2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Background="#0F000000" CornerRadius="12" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Dealer hand" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding DealerValue, StringFormat=Value: {0}}" Margin="0,6,0,0"/>
+                    <ItemsControl ItemsSource="{Binding DealerCards}" Margin="0,8,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Margin="0,2,0,2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="3"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,16,0,0">
@@ -43,13 +86,17 @@
                     Command="{Binding NewRoundCommand}"
                     Padding="16,8"
                     Margin="0,0,12,0"/>
-            <Button Content="Settings"
+            <Button Content="Hit"
+                    Command="{Binding HitCommand}"
                     Padding="16,8"
-                    Margin="0,0,12,0"
-                    IsEnabled="False"/>
-            <Button Content="Help"
+                    Margin="0,0,12,0"/>
+            <Button Content="Stand"
+                    Command="{Binding StandCommand}"
                     Padding="16,8"
-                    IsEnabled="False"/>
+                    Margin="0,0,12,0"/>
+            <Button Content="Finish round"
+                    Command="{Binding FinishRoundCommand}"
+                    Padding="16,8"/>
         </StackPanel>
     </Grid>
 </Window>

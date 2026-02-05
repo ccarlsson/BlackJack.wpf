@@ -1,11 +1,9 @@
-﻿using System.Windows;
-
-namespace BlackJack.Presentation;
+﻿namespace BlackJack.Presentation;
 
 /// <summary>
-/// Interaktionslogik för App.xaml
+/// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
 }
 

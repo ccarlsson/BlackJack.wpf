@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BlackJack.Domain\BlackJack.Domain.csproj" />
     <ProjectReference Include="..\BlackJack.Application\BlackJack.Application.csproj" />
+    <ProjectReference Include="..\BlackJack.Infrastructure\BlackJack.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
