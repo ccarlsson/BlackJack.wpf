@@ -120,7 +120,6 @@ Dokumentet beskriver:
 
 ---
 
-
 ## 5. Designkrav (OOP, Clean Architecture, MVVM)
 
 - Inkapsling: privata fält, publika properties/metoder.
@@ -131,7 +130,6 @@ Dokumentet beskriver:
 - **MVVM:** WPF-applikationen ska implementera MVVM-mönstret (Model-View-ViewModel) för att separera UI-logik från affärslogik och underlätta testning och underhåll.
 
 ---
-
 
 ## 6. Tekniska specifikationer
 
@@ -162,4 +160,3 @@ Dokumentet beskriver:
 - Exempel på konsolinteraktion
 - Rekommenderade testfall
 - Spårbarhetsmatris
-
