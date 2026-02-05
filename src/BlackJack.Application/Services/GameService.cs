@@ -71,6 +71,32 @@ public sealed class GameService : IGameService
     return state;
   }
 
+  public RoundState PlayerSplit(RoundState state)
+  {
+    if (state is null)
+    {
+      throw new ArgumentNullException(nameof(state));
+    }
+
+    EnsurePlayerTurn(state);
+
+    if (!CanSplit(state))
+    {
+      throw new InvalidOperationException("Split is not available.");
+    }
+
+    var activeHand = state.Player.ActiveHand;
+    var secondCard = activeHand.RemoveAt(1);
+    var splitHand = new Hand();
+    splitHand.Add(secondCard);
+    state.Player.AddHand(splitHand);
+
+    activeHand.Add(state.Shoe.Draw());
+    splitHand.Add(state.Shoe.Draw());
+
+    return state;
+  }
+
   public RoundResult FinishRound(RoundState state)
   {
     if (state is null)
@@ -125,6 +151,18 @@ public sealed class GameService : IGameService
     }
 
     state.IsPlayerTurn = false;
+  }
+
+  private static bool CanSplit(RoundState state)
+  {
+    if (state.Player.Hands.Count > 1)
+    {
+      return false;
+    }
+
+    var cards = state.Player.ActiveHand.Cards;
+
+    return cards.Count == 2 && cards[0].Rank == cards[1].Rank;
   }
 
   private static void DealerPlay(RoundState state)

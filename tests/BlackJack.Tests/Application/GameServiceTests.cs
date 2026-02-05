@@ -42,6 +42,20 @@ public class GameServiceTests
     Assert.False(updated.IsPlayerTurn);
   }
 
+  [Fact]
+  public void PlayerSplit_CreatesSecondHandAndDealsCards()
+  {
+    var service = new GameService();
+    var state = BuildSplitState();
+
+    var updated = service.PlayerSplit(state);
+
+    Assert.Equal(2, updated.Player.Hands.Count);
+    Assert.Equal(2, updated.Player.Hands[0].Cards.Count);
+    Assert.Equal(2, updated.Player.Hands[1].Cards.Count);
+    Assert.Equal(0, updated.Player.ActiveHandIndex);
+  }
+
   private static RoundState BuildState()
   {
     var shoe = new Shoe(1);
@@ -50,6 +64,20 @@ public class GameServiceTests
 
     player.ActiveHand.Add(new Card(Suit.Spades, Rank.Two));
     player.ActiveHand.Add(new Card(Suit.Hearts, Rank.Three));
+    dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
+    dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
+
+    return new RoundState(shoe, player, dealer, standOnSoft17: true);
+  }
+
+  private static RoundState BuildSplitState()
+  {
+    var shoe = new Shoe(1);
+    var player = new HumanPlayer("Tester");
+    var dealer = new Dealer("Dealer");
+
+    player.ActiveHand.Add(new Card(Suit.Spades, Rank.Eight));
+    player.ActiveHand.Add(new Card(Suit.Hearts, Rank.Eight));
     dealer.ActiveHand.Add(new Card(Suit.Clubs, Rank.Four));
     dealer.ActiveHand.Add(new Card(Suit.Diamonds, Rank.Five));
 

@@ -24,4 +24,24 @@
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
+
+    <DataTemplate x:Key="HandTemplate">
+        <Border x:Name="HandFrame" Background="#1A2533" BorderBrush="#2D3B50" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,12,12">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                <TextBlock Text="{Binding ValueText}" Margin="0,6,0,0" FontSize="14"/>
+                <ItemsControl ItemsSource="{Binding Cards}" Margin="0,8,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <StaticResource ResourceKey="CardTemplate"/>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                <Setter TargetName="HandFrame" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter TargetName="HandFrame" Property="Background" Value="#1B2B3B"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
 </ResourceDictionary>

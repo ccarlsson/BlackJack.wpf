@@ -32,7 +32,7 @@ public partial class MainViewModel : ObservableObject
     StandOnSoft17 = _settings.StandOnSoft17;
   }
 
-  public ObservableCollection<string> PlayerCards { get; } = new();
+  public ObservableCollection<PlayerHandViewModel> PlayerHands { get; } = new();
 
   public ObservableCollection<string> DealerCards { get; } = new();
 
@@ -58,9 +58,6 @@ public partial class MainViewModel : ObservableObject
 
   [ObservableProperty]
   private bool _standOnSoft17;
-
-  [ObservableProperty]
-  private int _playerValue;
 
   [ObservableProperty]
   private int _dealerValue;
@@ -145,7 +142,14 @@ public partial class MainViewModel : ObservableObject
   [RelayCommand(CanExecute = nameof(CanSplit))]
   private void Split()
   {
-    StatusText = "Split is not implemented yet.";
+    if (_roundState is null)
+    {
+      return;
+    }
+
+    _roundState = _gameService.PlayerSplit(_roundState);
+    UpdateFromState();
+    StatusText = "Split completed.";
   }
 
   private bool CanHit() => _roundState is not null && IsRoundActive && IsPlayerTurn;
@@ -164,13 +168,12 @@ public partial class MainViewModel : ObservableObject
     {
       IsRoundActive = false;
       IsPlayerTurn = false;
-      PlayerValue = 0;
       DealerValue = 0;
       DealerValueText = "";
       RoundStateText = "Idle";
       IsSplitAvailable = false;
       IsDoubleDownAvailable = false;
-      PlayerCards.Clear();
+      PlayerHands.Clear();
       DealerCards.Clear();
       UpdateCommandStates();
       return;
@@ -178,17 +181,19 @@ public partial class MainViewModel : ObservableObject
 
     IsRoundActive = !_roundState.IsRoundOver;
     IsPlayerTurn = _roundState.IsPlayerTurn;
-    PlayerValue = _roundState.Player.ActiveHand.BestValue;
     DealerValue = ResolveDealerValue(_roundState);
     DealerValueText = ResolveDealerValueText(_roundState);
     RoundStateText = ResolveRoundStateText(_roundState);
     IsSplitAvailable = ResolveSplitAvailability(_roundState);
     IsDoubleDownAvailable = ResolveDoubleDownAvailability(_roundState);
 
-    PlayerCards.Clear();
-    foreach (var card in _roundState.Player.ActiveHand.Cards)
+    PlayerHands.Clear();
+    for (var index = 0; index < _roundState.Player.Hands.Count; index++)
     {
-      PlayerCards.Add(FormatCard(card));
+      var hand = _roundState.Player.Hands[index];
+      var cards = hand.Cards.Select(FormatCard).ToList();
+      var isActive = index == _roundState.Player.ActiveHandIndex;
+      PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, cards));
     }
 
     DealerCards.Clear();
@@ -282,7 +287,7 @@ public partial class MainViewModel : ObservableObject
 
     var cards = state.Player.ActiveHand.Cards;
 
-    return cards.Count == 2 && cards[0].Rank == cards[1].Rank;
+    return state.Player.Hands.Count == 1 && cards.Count == 2 && cards[0].Rank == cards[1].Rank;
   }
 
   private static bool ResolveDoubleDownAvailability(RoundState state)

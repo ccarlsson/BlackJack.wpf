@@ -38,6 +38,13 @@ public sealed class Hand
 
   public void Add(Card card) => _cards.Add(card);
 
+  public Card RemoveAt(int index)
+  {
+    var card = _cards[index];
+    _cards.RemoveAt(index);
+    return card;
+  }
+
   public void Clear() => _cards.Clear();
 
   public IReadOnlyList<int> GetTotals() => CalculateTotals().Totals;
