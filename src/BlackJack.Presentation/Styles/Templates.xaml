@@ -69,27 +69,41 @@
         <TextBlock Text="{Binding ValueText}"
             Margin="0,6,0,0"
             FontSize="14"/>
-        <Border x:Name="OutcomeChip"
-            Background="#18222E"
-            BorderBrush="#2A3A4D"
-            BorderThickness="1"
-            CornerRadius="6"
-            Padding="6,2"
-            Margin="0,6,0,0"
-            HorizontalAlignment="Left">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock x:Name="OutcomeIcon"
-                Text=""
-                Foreground="{StaticResource TextPrimary}"
-                FontWeight="Bold"
-                Margin="0,0,6,0"
+        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+          <Border x:Name="OutcomeChip"
+              Background="#18222E"
+              BorderBrush="#2A3A4D"
+              BorderThickness="1"
+              CornerRadius="6"
+              Padding="6,2"
+              HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock x:Name="OutcomeIcon"
+                  Text=""
+                  Foreground="{StaticResource TextPrimary}"
+                  FontWeight="Bold"
+                  Margin="0,0,6,0"
+                  FontSize="12"/>
+              <TextBlock x:Name="HandOutcome"
+                  Text="{Binding OutcomeText}"
+                  Foreground="{StaticResource TextPrimary}"
+                  FontSize="12"/>
+            </StackPanel>
+          </Border>
+          <Border x:Name="PayoutChip"
+              Background="#151E2A"
+              BorderBrush="#2A3A4D"
+              BorderThickness="1"
+              CornerRadius="6"
+              Padding="6,2"
+              Margin="8,0,0,0"
+              HorizontalAlignment="Left">
+            <TextBlock x:Name="PayoutLabel"
+                Text="{Binding PayoutText}"
+                Foreground="{StaticResource TextMuted}"
                 FontSize="12"/>
-            <TextBlock x:Name="HandOutcome"
-                Text="{Binding OutcomeText}"
-                Foreground="{StaticResource TextPrimary}"
-                FontSize="12"/>
-          </StackPanel>
-        </Border>
+          </Border>
+        </StackPanel>
         <ItemsControl ItemsSource="{Binding Cards}"
             Margin="0,8,0,0">
           <ItemsControl.ItemTemplate>
@@ -104,6 +118,9 @@
         <Setter TargetName="OutcomeChip"
             Property="Visibility"
             Value="Collapsed"/>
+         <Setter TargetName="PayoutChip"
+           Property="Visibility"
+           Value="Collapsed"/>
       </DataTrigger>
         <DataTrigger Binding="{Binding OutcomeTone}"
           Value="Win">

@@ -218,8 +218,8 @@ public partial class MainViewModel : ObservableObject
       var hand = _roundState.Player.Hands[index];
       var cards = hand.Cards.Select(FormatCard).ToList();
       var isActive = index == _roundState.Player.ActiveHandIndex;
-      var (outcomeText, outcomeTone) = ResolveOutcomeText(_roundState, _lastResult, index);
-      PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, outcomeText, outcomeTone, cards));
+      var (outcomeText, outcomeTone, payoutText) = ResolveOutcomeText(_roundState, _lastResult, index);
+      PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, outcomeText, outcomeTone, payoutText, cards));
     }
 
     DealerCards.Clear();
@@ -287,26 +287,38 @@ public partial class MainViewModel : ObservableObject
     return state.IsPlayerTurn ? "Player turn" : "Dealer turn";
   }
 
-  private static (string Text, string Tone) ResolveOutcomeText(RoundState state, RoundResult? result, int handIndex)
+  private static (string Text, string Tone, string Payout) ResolveOutcomeText(
+    RoundState state,
+    RoundResult? result,
+    int handIndex)
   {
     if (!state.IsRoundOver || result is null)
     {
-      return ("", "");
+      return ("", "", "");
     }
 
     var handResult = result.HandResults.FirstOrDefault(item => item.HandIndex == handIndex);
 
     if (handResult is null)
     {
-      return ("", "");
+      return ("", "", "");
     }
 
-    return handResult.Outcome switch
+    var payoutText = handResult.PayoutMultiplier switch
     {
-      OutcomeType.PlayerWin => ("Result: Win", "Win"),
-      OutcomeType.DealerWin => ("Result: Lose", "Lose"),
-      _ => ("Result: Push", "Push")
+      > 0m => $"Payout: +{handResult.PayoutMultiplier:0.##}x",
+      < 0m => $"Payout: {handResult.PayoutMultiplier:0.##}x",
+      _ => "Payout: 0x"
     };
+
+    var outcome = handResult.Outcome switch
+    {
+      OutcomeType.PlayerWin => ("Result: Win", "Win", payoutText),
+      OutcomeType.DealerWin => ("Result: Lose", "Lose", payoutText),
+      _ => ("Result: Push", "Push", payoutText)
+    };
+
+    return outcome;
   }
 
   private static bool ResolveSplitAvailability(RoundState state)
