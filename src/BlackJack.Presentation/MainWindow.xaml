@@ -22,10 +22,14 @@
 
     <Grid Margin="24">
         <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0B1117" Offset="0"/>
-                <GradientStop Color="#0E1722" Offset="0.5"/>
-                <GradientStop Color="#121B26" Offset="1"/>
+            <LinearGradientBrush StartPoint="0,0"
+                    EndPoint="1,1">
+                <GradientStop Color="#0B1117"
+                        Offset="0"/>
+                <GradientStop Color="#0E1722"
+                        Offset="0.5"/>
+                <GradientStop Color="#121B26"
+                        Offset="1"/>
             </LinearGradientBrush>
         </Grid.Background>
 
@@ -63,17 +67,32 @@
                 Margin="0,12,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Player" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
-                    <TextBox Text="{Binding PlayerName}" Width="180" Margin="12,0,0,0"/>
-                    <TextBlock Text="Round:" Margin="24,0,0,0" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
-                    <TextBlock Text="{Binding RoundStateText}" Margin="8,0,0,0"/>
+                    <TextBlock Text="Player"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
+                    <TextBox Text="{Binding PlayerName}"
+                            Width="180"
+                            Margin="12,0,0,0"/>
+                    <TextBlock Text="Round:"
+                            Margin="24,0,0,0"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
+                    <TextBlock Text="{Binding RoundStateText}"
+                            Margin="8,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="Status:" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
-                    <TextBlock Text="{Binding StatusText}" Margin="8,0,0,0"/>
+                <StackPanel Orientation="Horizontal"
+                        Margin="0,8,0,0">
+                    <TextBlock Text="Status:"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
+                    <TextBlock Text="{Binding StatusText}"
+                            Margin="8,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="Decks" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
+                <StackPanel Orientation="Horizontal"
+                        Margin="0,8,0,0">
+                    <TextBlock Text="Decks"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
                     <ComboBox ItemsSource="{Binding DeckCounts}"
                               SelectedItem="{Binding DeckCount}"
                               Width="120"
@@ -90,16 +109,25 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="3" Margin="0,18,0,0">
+        <Grid Grid.Row="3"
+                Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Background="{StaticResource PanelAlt}" BorderBrush="#1E2A3A" BorderThickness="1" CornerRadius="14" Padding="16" Margin="0,0,12,0">
+            <Border Background="{StaticResource PanelAlt}"
+                    BorderBrush="#1E2A3A"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16"
+                    Margin="0,0,12,0">
                 <StackPanel>
-                    <TextBlock Text="Player hands" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
-                    <ItemsControl ItemsSource="{Binding PlayerHands}" Margin="0,10,0,0">
+                    <TextBlock Text="Player hands"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
+                    <ItemsControl ItemsSource="{Binding PlayerHands}"
+                            Margin="0,10,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
@@ -112,11 +140,21 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Background="{StaticResource PanelAlt}" BorderBrush="#1E2A3A" BorderThickness="1" CornerRadius="14" Padding="16">
+            <Border Grid.Column="1"
+                    Background="{StaticResource PanelAlt}"
+                    BorderBrush="#1E2A3A"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Dealer hand" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}"/>
-                    <TextBlock Text="{Binding DealerValueText}" Margin="0,6,0,0" FontSize="16"/>
-                    <ItemsControl ItemsSource="{Binding DealerCards}" Margin="0,8,0,0">
+                    <TextBlock Text="Dealer hand"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextMuted}"/>
+                    <TextBlock Text="{Binding DealerValueText}"
+                            Margin="0,6,0,0"
+                            FontSize="16"/>
+                    <ItemsControl ItemsSource="{Binding DealerCards}"
+                            Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
                             <StaticResource ResourceKey="CardTemplate"/>
                         </ItemsControl.ItemTemplate>
@@ -125,40 +163,41 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="4" Margin="0,18,0,0">
+        <Grid Grid.Row="4"
+                Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Orientation="Horizontal"
-                HorizontalAlignment="Left">
-            <Button Content="New round"
-                    Command="{Binding NewRoundCommand}"
-                    Margin="0,0,12,0"/>
-            <Button Content="Hit"
-                    Command="{Binding HitCommand}"
-                    Margin="0,0,12,0"/>
-            <Button Content="Stand"
-                    Command="{Binding StandCommand}"
-                    Margin="0,0,12,0"/>
-            <Button Content="Double down"
-                Command="{Binding DoubleDownCommand}"
-                Margin="0,0,12,0"/>
-            <Button Content="Split"
-                Command="{Binding SplitCommand}"
-                Margin="0,0,12,0"/>
-            <Button Content="Finish round"
-                    Command="{Binding FinishRoundCommand}"
-                Background="#1F2E3D"
-                BorderBrush="#2F3F55"/>
+                        HorizontalAlignment="Left">
+                <Button Content="New round"
+                        Command="{Binding NewRoundCommand}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Hit"
+                        Command="{Binding HitCommand}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Stand"
+                        Command="{Binding StandCommand}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Double down"
+                        Command="{Binding DoubleDownCommand}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Split"
+                        Command="{Binding SplitCommand}"
+                        Margin="0,0,12,0"/>
+                <Button Content="Finish round"
+                        Command="{Binding FinishRoundCommand}"
+                        Background="#1F2E3D"
+                        BorderBrush="#2F3F55"/>
             </StackPanel>
 
             <Button Grid.Column="1"
-                Content="Exit"
+                    Content="Exit"
                     Command="{Binding ExitCommand}"
-                Background="#2A1A20"
-                BorderBrush="#3B1F28"/>
+                    Background="#2A1A20"
+                    BorderBrush="#3B1F28"/>
         </Grid>
     </Grid>
 </Window>
