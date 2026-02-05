@@ -13,6 +13,7 @@ public partial class MainViewModel : ObservableObject
   private readonly IRandomProvider _randomProvider;
   private readonly GameSettings _settings;
   private RoundState? _roundState;
+  private RoundResult? _lastResult;
 
   public MainViewModel()
     : this(new GameService(), new RandomProvider(), GameSettings.Default)
@@ -90,6 +91,7 @@ public partial class MainViewModel : ObservableObject
       _settings.AllowResplitAces,
       _settings.RestrictSplitAcesToOneCard,
       _settings.AllowDoubleDownAfterSplitAces);
+    _lastResult = null;
     _roundState = _gameService.StartNewRound(settings, _randomProvider, PlayerName);
     UpdateFromState();
     StatusText = "New round started.";
@@ -128,8 +130,9 @@ public partial class MainViewModel : ObservableObject
     }
 
     var result = _gameService.FinishRound(_roundState);
+    _lastResult = result;
     UpdateFromState();
-    StatusText = BuildOutcomeSummary(result);
+    StatusText = "Round complete.";
   }
 
   [RelayCommand(CanExecute = nameof(CanDoubleDown))]
@@ -200,7 +203,8 @@ public partial class MainViewModel : ObservableObject
       var hand = _roundState.Player.Hands[index];
       var cards = hand.Cards.Select(FormatCard).ToList();
       var isActive = index == _roundState.Player.ActiveHandIndex;
-      PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, cards));
+      var outcomeText = ResolveOutcomeText(_roundState, _lastResult, index);
+      PlayerHands.Add(new PlayerHandViewModel(index, hand.BestValue, isActive, outcomeText, cards));
     }
 
     DealerCards.Clear();
@@ -210,23 +214,6 @@ public partial class MainViewModel : ObservableObject
     }
 
     UpdateCommandStates();
-  }
-
-  private string BuildOutcomeSummary(RoundResult result)
-  {
-    if (result.HandResults.Count == 0)
-    {
-      return "Round finished.";
-    }
-
-    var hand = result.HandResults[0];
-
-    return hand.Outcome switch
-    {
-      OutcomeType.PlayerWin => "Player wins.",
-      OutcomeType.DealerWin => "Dealer wins.",
-      _ => "Push."
-    };
   }
 
   private static string FormatCard(Card card)
@@ -283,6 +270,28 @@ public partial class MainViewModel : ObservableObject
     }
 
     return state.IsPlayerTurn ? "Player turn" : "Dealer turn";
+  }
+
+  private static string ResolveOutcomeText(RoundState state, RoundResult? result, int handIndex)
+  {
+    if (!state.IsRoundOver || result is null)
+    {
+      return "";
+    }
+
+    var handResult = result.HandResults.FirstOrDefault(item => item.HandIndex == handIndex);
+
+    if (handResult is null)
+    {
+      return "";
+    }
+
+    return handResult.Outcome switch
+    {
+      OutcomeType.PlayerWin => "Result: Win",
+      OutcomeType.DealerWin => "Result: Lose",
+      _ => "Result: Push"
+    };
   }
 
   private static bool ResolveSplitAvailability(RoundState state)

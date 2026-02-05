@@ -69,6 +69,11 @@
         <TextBlock Text="{Binding ValueText}"
             Margin="0,6,0,0"
             FontSize="14"/>
+        <TextBlock x:Name="HandOutcome"
+          Text="{Binding OutcomeText}"
+          Margin="0,4,0,0"
+          Foreground="{StaticResource Accent}"
+          FontSize="12"/>
         <ItemsControl ItemsSource="{Binding Cards}"
             Margin="0,8,0,0">
           <ItemsControl.ItemTemplate>
@@ -78,6 +83,12 @@
       </StackPanel>
     </Border>
     <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding OutcomeText}"
+          Value="">
+        <Setter TargetName="HandOutcome"
+            Property="Visibility"
+            Value="Collapsed"/>
+      </DataTrigger>
       <DataTrigger Binding="{Binding IsActive}"
           Value="True">
         <Setter TargetName="HandFrame"
