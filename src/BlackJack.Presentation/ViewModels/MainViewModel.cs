@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BlackJack.Application;
 using BlackJack.Domain;
-using BlackJack.Presentation.Services;
+using BlackJack.Presentation.UiServices;
 
 namespace BlackJack.Presentation.ViewModels;
 

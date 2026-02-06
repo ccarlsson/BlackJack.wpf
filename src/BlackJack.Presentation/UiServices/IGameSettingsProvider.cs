@@ -1,6 +1,6 @@
 using BlackJack.Application;
 
-namespace BlackJack.Presentation.Services;
+namespace BlackJack.Presentation.UiServices;
 
 public interface IGameSettingsProvider
 {

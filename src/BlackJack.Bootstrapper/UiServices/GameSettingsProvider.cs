@@ -1,6 +1,7 @@
 using BlackJack.Application;
+using BlackJack.Presentation.UiServices;
 
-namespace BlackJack.Presentation.Services;
+namespace BlackJack.Bootstrapper.UiServices;
 
 public sealed class GameSettingsProvider : IGameSettingsProvider
 {

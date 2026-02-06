@@ -1,4 +1,4 @@
-namespace BlackJack.Presentation.Services;
+namespace BlackJack.Presentation.UiServices;
 
 public interface IExitService
 {

@@ -1,12 +1,14 @@
-﻿using System.Windows;
+using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using BlackJack.Application;
 using BlackJack.Domain;
 using BlackJack.Infrastructure;
-using BlackJack.Presentation.Services;
+using BlackJack.Presentation;
+using BlackJack.Presentation.UiServices;
 using BlackJack.Presentation.ViewModels;
+using BlackJack.Bootstrapper.UiServices;
 
-namespace BlackJack.Presentation;
+namespace BlackJack.Bootstrapper;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -33,7 +35,6 @@ public partial class App : System.Windows.Application
     _serviceProvider = services.BuildServiceProvider();
 
     var window = _serviceProvider.GetRequiredService<MainWindow>();
-    window.DataContext = _serviceProvider.GetRequiredService<MainViewModel>();
     window.Show();
   }
 
@@ -43,4 +44,3 @@ public partial class App : System.Windows.Application
     base.OnExit(e);
   }
 }
-

@@ -1,6 +1,7 @@
 using System.Windows;
+using BlackJack.Presentation.UiServices;
 
-namespace BlackJack.Presentation.Services;
+namespace BlackJack.Bootstrapper.UiServices;
 
 public sealed class ExitService : IExitService
 {
