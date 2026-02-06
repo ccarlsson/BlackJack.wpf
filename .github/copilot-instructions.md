@@ -1,13 +1,12 @@
 # Copilot Instructions for BlackJack
 
-- Projektet är en WPF-applikation för Black Jack enligt Clean Architecture och MVVM.
-- Lösningen innehåller projekten: Presentation (WPF, MVVM), Application, Domain, Infrastructure, Tests (xUnit).
-- All kod ska följa Clean Architecture-principer och MVVM för UI.
-- Presentation-projektet ska endast innehålla UI och ViewModels.
-- MVVM ska implementeras med hjälp av NuGet-paketet CommunityToolkit.MVVM.
-- Application-projektet innehåller applikationslogik och use cases.
-- Domain-projektet innehåller domänmodeller och gränssnitt.
-- Infrastructure-projektet innehåller implementationer för dataåtkomst och externa tjänster.
-- Tests-projektet innehåller enhetstester för övriga lager.
-- Använd C# 14 och .NET 10.
-- All kod och dokumentation ska vara på engelska.
+- The solution contains these projects: Presentation (WPF, MVVM), Application, Domain, Infrastructure, Tests (xUnit).
+- Use Clean Architecture principles and MVVM for UI.
+- The `Presentation` project must only contain UI and ViewModels.
+- Use the `CommunityToolkit.MVVM` NuGet package for MVVM.
+- The `Application` project contains application logic and use cases.
+- The `Domain` project contains domain models and interfaces.
+- The `Infrastructure` project contains implementations for data access and external services.
+- The `Tests` project contains unit tests for the other layers (xUnit).
+- Target C# 14 and .NET 10.
+- All code and documentation must be written in English.
