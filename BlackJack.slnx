@@ -3,6 +3,7 @@
     <Project Path="src/BlackJack.Application/BlackJack.Application.csproj" />
     <Project Path="src/BlackJack.Domain/BlackJack.Domain.csproj" />
     <Project Path="src/BlackJack.Infrastructure/BlackJack.Infrastructure.csproj" />
+    <Project Path="src/BlackJack.Console/BlackJack.Console.csproj" />
     <Project Path="src/BlackJack.Bootstrapper/BlackJack.Bootstrapper.csproj" />
     <Project Path="src/BlackJack.Presentation/BlackJack.Presentation.csproj" />
   </Folder>
