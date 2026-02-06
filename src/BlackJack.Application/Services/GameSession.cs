@@ -219,7 +219,8 @@ public sealed class GameSession : IGameSession
         continue;
       }
 
-      net += handResult.PayoutMultiplier * state.HandBets[handResult.HandIndex];
+      var bet = state.HandBets[handResult.HandIndex];
+      net += (1m + handResult.PayoutMultiplier) * bet;
     }
 
     Bankroll += net;
